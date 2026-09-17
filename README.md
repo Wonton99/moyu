@@ -2,7 +2,7 @@
 
 浏览器里即点即玩的小游戏门户。无需下载安装，进度存在本机。
 
-**在线游玩：** https://wonton99.github.io/shudu/
+**在线游玩：** https://wonton99.github.io/moyu/
 
 ## 游戏
 
