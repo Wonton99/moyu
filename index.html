@@ -12,188 +12,85 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="scanlines" aria-hidden="true"></div>
-
   <header class="topbar">
-    <a class="brand" href="./" aria-label="回到首页">
-      <span class="brand-mark" aria-hidden="true">N</span>
-      <span class="brand-text">
-        <strong>摸鱼</strong>
-        <em>MOYU ARCADE</em>
-      </span>
+    <a class="brand" href="./">
+      <span class="brand-mark" aria-hidden="true">摸</span>
+      <span class="brand-name">摸鱼</span>
     </a>
-    <div class="top-meta">
-      <span class="chip"><span class="dot"></span>2 款在线</span>
-      <span class="chip muted">免安装 · 浏览器直玩</span>
-    </div>
+    <span class="online">2 款游戏</span>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">PERSONAL ARCADE · v1</p>
-        <h1>把街机厅<br /><span>塞进浏览器</span></h1>
-        <p class="lede">两款即开即玩的小游戏。解数独挂机变强，或召唤亡灵拆穿楼层。进度都存在本地，关掉网页也不会丢。</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#games">开始游玩</a>
-          <a class="btn btn-ghost" href="#how">怎么分享给朋友</a>
+    <section class="intro">
+      <h1>小游戏合集</h1>
+      <p>点开即玩，进度存在本机。</p>
+    </section>
+
+    <section class="games" aria-label="游戏列表">
+      <article class="game-card">
+        <a class="card-link" href="games/necromancer/" aria-label="开始游玩 死灵召唤师"></a>
+        <div class="card-art art-necro" aria-hidden="true">
+          <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg">
+            <rect width="480" height="270" fill="#F3E8F0"/>
+            <circle cx="360" cy="70" r="48" fill="#FF4D8D" opacity="0.12"/>
+            <circle cx="100" cy="210" r="56" fill="#3DE7C7" opacity="0.1"/>
+            <ellipse cx="240" cy="118" rx="42" ry="48" fill="#FFFFFF" stroke="#FF4D8D" stroke-width="1.5"/>
+            <circle cx="224" cy="112" r="8" fill="#1A1D23"/>
+            <circle cx="256" cy="112" r="8" fill="#1A1D23"/>
+            <path d="M228 138h24" stroke="#1A1D23" stroke-width="3" stroke-linecap="round"/>
+            <path d="M232 146v10M240 146v12M248 146v10" stroke="#1A1D23" stroke-width="2"/>
+            <rect x="90" y="170" width="28" height="36" rx="4" fill="#FFFFFF" stroke="#14B8A6" stroke-width="1.2"/>
+            <rect x="130" y="182" width="22" height="28" rx="3" fill="#FFFFFF" stroke="#14B8A6" stroke-width="1.2" opacity="0.75"/>
+            <rect x="340" y="176" width="26" height="34" rx="4" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.2"/>
+            <rect x="378" y="186" width="20" height="26" rx="3" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.2" opacity="0.75"/>
+          </svg>
         </div>
-      </div>
-      <div class="hero-art" aria-hidden="true">
-        <svg viewBox="0 0 360 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="24" y="36" width="140" height="140" rx="10" stroke="#3DE7C7" stroke-width="1.5" opacity="0.9"/>
-          <rect x="48" y="60" width="92" height="92" rx="6" stroke="#3DE7C7" stroke-width="1" opacity="0.45"/>
-          <path d="M94 60v92M48 106h92" stroke="#3DE7C7" stroke-width="1" opacity="0.35"/>
-          <rect x="180" y="70" width="120" height="160" rx="12" stroke="#FF4D8D" stroke-width="1.5" opacity="0.9"/>
-          <circle cx="240" cy="130" r="28" stroke="#FF4D8D" stroke-width="1.2" opacity="0.7"/>
-          <circle cx="228" cy="124" r="4" fill="#FF4D8D"/>
-          <circle cx="252" cy="124" r="4" fill="#FF4D8D"/>
-          <path d="M226 142c8 10 20 10 28 0" stroke="#FF4D8D" stroke-width="1.5" opacity="0.8"/>
-          <rect x="200" y="176" width="80" height="28" rx="6" stroke="#F5C542" stroke-width="1" opacity="0.75"/>
-          <text x="240" y="195" text-anchor="middle" fill="#F5C542" font-size="11" font-family="Consolas, monospace">SUMMON</text>
-          <circle cx="310" cy="48" r="3" fill="#3DE7C7"/>
-          <circle cx="330" cy="88" r="2" fill="#FF4D8D"/>
-          <circle cx="40" cy="220" r="2" fill="#F5C542"/>
-          <path d="M164 120h16" stroke="#8B95A8" stroke-width="1" opacity="0.5"/>
-          <path d="M168 116l8 4-8 4" stroke="#8B95A8" stroke-width="1" opacity="0.5"/>
-        </svg>
-      </div>
-    </section>
+        <div class="card-body">
+          <div class="card-top">
+            <h2>死灵召唤师</h2>
+            <span class="ver">v0.5.9</span>
+          </div>
+          <p>动作 Roguelike · 召唤亡灵清层</p>
+          <span class="play">开始游戏 →</span>
+        </div>
+      </article>
 
-    <section id="games" class="section games">
-      <div class="section-head">
-        <h2>游戏库</h2>
-        <p>点开就进，不用注册。</p>
-      </div>
-
-      <div class="game-grid">
-        <article class="game-card" data-game="necromancer">
-          <a class="card-hit" href="games/necromancer/" aria-label="开始游玩 死灵召唤师"></a>
-          <div class="card-art art-necro" aria-hidden="true">
-            <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="gN" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#1a0b24"/>
-                  <stop offset="100%" stop-color="#0A0E17"/>
-                </linearGradient>
-              </defs>
-              <rect width="480" height="270" fill="url(#gN)"/>
-              <circle cx="360" cy="70" r="36" fill="#FF4D8D" opacity="0.15"/>
-              <circle cx="120" cy="200" r="50" fill="#3DE7C7" opacity="0.06"/>
-              <!-- skull -->
-              <ellipse cx="240" cy="118" rx="42" ry="48" fill="#2a2038" stroke="#FF4D8D" stroke-width="1.5"/>
-              <circle cx="224" cy="112" r="8" fill="#0A0E17"/>
-              <circle cx="256" cy="112" r="8" fill="#0A0E17"/>
-              <path d="M228 138h24" stroke="#0A0E17" stroke-width="3" stroke-linecap="round"/>
-              <path d="M232 146v10M240 146v12M248 146v10" stroke="#0A0E17" stroke-width="2"/>
-              <!-- minions -->
-              <rect x="90" y="170" width="28" height="36" rx="4" fill="#1C2538" stroke="#3DE7C7" stroke-width="1"/>
-              <rect x="130" y="182" width="22" height="28" rx="3" fill="#1C2538" stroke="#3DE7C7" stroke-width="1" opacity="0.8"/>
-              <rect x="340" y="176" width="26" height="34" rx="4" fill="#1C2538" stroke="#F5C542" stroke-width="1"/>
-              <rect x="378" y="186" width="20" height="26" rx="3" fill="#1C2538" stroke="#F5C542" stroke-width="1" opacity="0.7"/>
-              <!-- floor line -->
-              <path d="M40 220h400" stroke="#8B95A8" stroke-width="1" opacity="0.35"/>
-              <text x="24" y="36" fill="#FF4D8D" font-size="12" font-family="Consolas, monospace" opacity="0.7">FLOOR 01</text>
-            </svg>
+      <article class="game-card">
+        <a class="card-link" href="games/sudoku/" aria-label="开始游玩 数独增量"></a>
+        <div class="card-art art-sudoku" aria-hidden="true">
+          <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg">
+            <rect width="480" height="270" fill="#E8F6F3"/>
+            <circle cx="90" cy="60" r="44" fill="#14B8A6" opacity="0.1"/>
+            <g transform="translate(150,40)" stroke="#0F766E" fill="none">
+              <rect width="180" height="180" stroke-width="1.5" opacity="0.7"/>
+              <path d="M60 0v180M120 0v180M0 60h180M0 120h180" stroke-width="1.2" opacity="0.55"/>
+              <path d="M20 0v180M40 0v180M80 0v180M100 0v180M140 0v180M160 0v180M0 20h180M0 40h180M0 80h180M0 100h180M0 140h180M0 160h180" stroke-width="0.6" opacity="0.25"/>
+              <text x="30" y="38" text-anchor="middle" fill="#0F766E" font-size="22" font-family="Consolas, monospace">7</text>
+              <text x="90" y="38" text-anchor="middle" fill="#1A1D23" font-size="22" font-family="Consolas, monospace" opacity="0.55">2</text>
+              <text x="150" y="98" text-anchor="middle" fill="#0F766E" font-size="22" font-family="Consolas, monospace">5</text>
+              <text x="30" y="158" text-anchor="middle" fill="#1A1D23" font-size="22" font-family="Consolas, monospace" opacity="0.55">1</text>
+              <text x="90" y="158" text-anchor="middle" fill="#0F766E" font-size="22" font-family="Consolas, monospace">9</text>
+            </g>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top">
+            <h2>数独增量</h2>
+            <span class="ver">v0.9.0</span>
           </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag tag-action">动作</span>
-              <span class="tag">Roguelike</span>
-              <span class="tag tag-ver">v0.5.9</span>
-            </div>
-            <h3>死灵召唤师</h3>
-            <p>召唤亡灵大军清层割草。技能、遗物、皮肤、成就局局不同，越打越强。</p>
-            <div class="card-foot">
-              <span class="meta">键鼠 · 有存档</span>
-              <span class="play">开始游戏 <span aria-hidden="true">→</span></span>
-            </div>
-          </div>
-        </article>
-
-        <article class="game-card" data-game="sudoku">
-          <a class="card-hit" href="games/sudoku/" aria-label="开始游玩 数独增量"></a>
-          <div class="card-art art-sudoku" aria-hidden="true">
-            <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="gS" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#0C1A22"/>
-                  <stop offset="100%" stop-color="#0A0E17"/>
-                </linearGradient>
-              </defs>
-              <rect width="480" height="270" fill="url(#gS)"/>
-              <circle cx="90" cy="70" r="40" fill="#3DE7C7" opacity="0.08"/>
-              <!-- 9x9 grid -->
-              <g transform="translate(150,40)" stroke="#3DE7C7" fill="none">
-                <rect width="180" height="180" stroke-width="1.5" opacity="0.85"/>
-                <path d="M60 0v180M120 0v180M0 60h180M0 120h180" stroke-width="1.2" opacity="0.7"/>
-                <path d="M20 0v180M40 0v180M80 0v180M100 0v180M140 0v180M160 0v180M0 20h180M0 40h180M0 80h180M0 100h180M0 140h180M0 160h180" stroke-width="0.6" opacity="0.35"/>
-                <text x="30" y="38" text-anchor="middle" fill="#3DE7C7" font-size="22" font-family="Consolas, monospace" opacity="0.9">7</text>
-                <text x="90" y="38" text-anchor="middle" fill="#E8ECF4" font-size="22" font-family="Consolas, monospace" opacity="0.55">2</text>
-                <text x="150" y="98" text-anchor="middle" fill="#3DE7C7" font-size="22" font-family="Consolas, monospace" opacity="0.9">5</text>
-                <text x="30" y="158" text-anchor="middle" fill="#E8ECF4" font-size="22" font-family="Consolas, monospace" opacity="0.55">1</text>
-                <text x="90" y="158" text-anchor="middle" fill="#3DE7C7" font-size="22" font-family="Consolas, monospace" opacity="0.9">9</text>
-              </g>
-              <text x="24" y="36" fill="#3DE7C7" font-size="12" font-family="Consolas, monospace" opacity="0.7">ENERGY</text>
-              <text x="24" y="58" fill="#F5C542" font-size="20" font-family="Consolas, monospace">⚡ 12840</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag tag-idle">休闲</span>
-              <span class="tag">增量</span>
-              <span class="tag tag-ver">v0.9.0</span>
-            </div>
-            <h3>数独增量</h3>
-            <p>填对得能量，通关换盘，升级自动化。挂机也能变强，适合碎片时间。</p>
-            <div class="card-foot">
-              <span class="meta">点触友好 · 有存档</span>
-              <span class="play">开始游戏 <span aria-hidden="true">→</span></span>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section id="how" class="section how">
-      <div class="section-head">
-        <h2>怎么玩 / 怎么分享</h2>
-      </div>
-      <ol class="steps">
-        <li>
-          <span class="step-num">01</span>
-          <div>
-            <h3>点卡片进游戏</h3>
-            <p>无需下载安装，Chrome / Edge / Firefox 最新浏览器即可。左下角「← 合集」随时回来。</p>
-          </div>
-        </li>
-        <li>
-          <span class="step-num">02</span>
-          <div>
-            <h3>进度存在本机</h3>
-            <p>两款游戏各自用浏览器 localStorage 存档，换设备会是新档。</p>
-          </div>
-        </li>
-        <li>
-          <span class="step-num">03</span>
-          <div>
-            <h3>把链接发给朋友</h3>
-            <p>部署到 GitHub Pages 后，直接分享网址即可。对方打开就能玩。</p>
-          </div>
-        </li>
-      </ol>
+          <p>休闲增量 · 解盘赚能量，挂机变强</p>
+          <span class="play">开始游戏 →</span>
+        </div>
+      </article>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="footer-brand">摸鱼小游戏合集</div>
-    <div class="footer-links">
-      <a href="games/necromancer/">死灵召唤师</a>
-      <a href="games/sudoku/">数独增量</a>
-    </div>
-    <p class="footer-note">纯静态 · 无后端 · MIT</p>
+    <span>摸鱼</span>
+    <span class="sep">·</span>
+    <a href="games/necromancer/">死灵召唤师</a>
+    <span class="sep">·</span>
+    <a href="games/sudoku/">数独增量</a>
   </footer>
-
-  <script src="js/portal.js"></script>
 </body>
 </html>
