@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>死灵召唤师 · 群殴操作你</title>
+  <link rel="stylesheet" href="style.css?v=cb25770788" />
+</head>
+<body>
+  <div id="app">
+    <a class="hub-back" href="../../" title="返回游戏合集">← 合集</a>
+    <canvas id="game" width="960" height="540"></canvas>
+
+    <div id="hud" class="hidden">
+      <div class="bars">
+        <div class="bar hp"><div id="hpFill"></div><span id="hpText">100/100</span></div>
+        <div class="bar mp"><div id="mpFill"></div><span id="mpText">60/60</span></div>
+        <div class="bar xp"><div id="xpFill"></div><span id="xpText">精华 0</span></div>
+      </div>
+      <div class="meta">
+        <span id="floorText">第 1 层</span>
+        <span id="roomText">房间 1/5</span>
+        <span id="summonText">召唤 0/6</span>
+        <span id="levelText">Lv.1</span>
+      </div>
+      <div id="skills" class="skill-bar"></div>
+      <div id="talentPanel" class="talent-panel hidden" aria-live="polite"></div>
+      <div id="hint" class="hint"></div>
+    </div>
+
+    <div id="overlay" class="overlay hidden">
+      <div class="panel" id="overlayPanel"></div>
+    </div>
+  </div>
+  <script type="module" src="src/main.js?v=cb25770788"></script>
+  <style>
+    .hub-back {
+      position: fixed;
+      left: 12px;
+      bottom: 12px;
+      z-index: 9999;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(232, 236, 244, 0.18);
+      background: rgba(10, 14, 23, 0.78);
+      color: #E8ECF4;
+      font: 600 12px/1.2 "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+      opacity: 0.55;
+      transition: opacity 0.15s ease;
+    }
+    .hub-back:hover, .hub-back:focus-visible {
+      opacity: 1;
+      outline: 2px solid #3DE7C7;
+      outline-offset: 2px;
+    }
+  </style>
+</body>
+</html>

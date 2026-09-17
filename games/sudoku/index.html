@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>数独增量</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <a class="hub-back" href="../../" title="返回游戏合集">← 合集</a>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">数</span>
+        <div class="brand-text">
+          <h1>数独增量</h1>
+          <span class="brand-sub">Sudoku Idle</span>
+        </div>
+      </div>
+      <div class="stats-row" aria-label="资源">
+        <span class="pill pill-energy" title="能量">⚡ <b id="energy">0</b></span>
+        <span class="pill" title="累计获得">累计 <b id="total-earned">0</b></span>
+        <span class="pill" title="完成盘数">盘 <b id="boards-completed">0</b></span>
+        <span class="pill" title="芯片">◈ <b id="chips">0</b></span>
+        <span class="pill pill-combo" title="手动连击">连击 <b id="combo">0</b></span>
+        <span class="pill pill-auto" title="自动化">
+          <span class="pill-label">自动</span>
+          <span class="auto-icons" id="auto-status"></span>
+        </span>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="meta-btn" class="ghost-btn" title="成就与图鉴">图鉴</button>
+        <button type="button" id="version-btn" class="ghost-btn" title="更新日志">v0.9.0</button>
+      </div>
+    </header>
+
+    <div id="update-bar" class="update-bar" hidden>
+      <span>发现新版本 <b id="update-ver"></b></span>
+      <button type="button" id="update-reload" class="ghost-btn">立即刷新</button>
+      <button type="button" id="update-later" class="ghost-btn">稍后</button>
+    </div>
+
+    <div id="changelog-modal" class="modal" hidden>
+      <div class="modal-card" role="dialog" aria-label="更新日志">
+        <div class="modal-head">
+          <h2>更新日志</h2>
+          <button type="button" id="changelog-close" class="ghost-btn">关闭</button>
+        </div>
+        <div id="changelog-body" class="modal-body"></div>
+      </div>
+    </div>
+
+    <div id="meta-modal" class="modal" hidden>
+      <div class="modal-card" role="dialog" aria-label="成就图鉴">
+        <div class="modal-head">
+          <h2>成长档案</h2>
+          <button type="button" id="meta-close" class="ghost-btn">关闭</button>
+        </div>
+        <div class="modal-tabs">
+          <button type="button" class="modal-tab active" data-meta-tab="ach">成就</button>
+          <button type="button" class="modal-tab" data-meta-tab="codex">图鉴</button>
+        </div>
+        <div id="ach-panel" class="modal-body meta-list"></div>
+        <div id="codex-panel" class="modal-body meta-list" hidden></div>
+      </div>
+    </div>
+
+    <div id="dict-modal" class="modal" hidden>
+      <div class="modal-card dict-card" role="dialog" aria-label="词典">
+        <div class="modal-head">
+          <h2 id="dict-title">词典</h2>
+          <div class="modal-head-actions">
+            <button type="button" id="dict-index" class="ghost-btn">目录</button>
+            <button type="button" id="dict-close" class="ghost-btn">关闭</button>
+          </div>
+        </div>
+        <div id="dict-body" class="dict-body"></div>
+      </div>
+    </div>
+
+    <main class="layout layout-3">
+      <aside class="progress-rail" aria-label="解锁进度">
+        <h2 class="rail-title">进度</h2>
+        <div id="unlock-panel" class="unlock-panel"></div>
+      </aside>
+
+      <section class="board-panel">
+        <div class="board-toolbar">
+          <div class="size-switch" id="size-switch" role="tablist" aria-label="盘面尺寸"></div>
+          <div class="board-meta">
+            <span class="meta-chip" id="board-progress">0 / 0</span>
+            <span class="meta-chip muted" id="income-hint"></span>
+            <span class="boss-badge" id="boss-badge" hidden>BOSS</span>
+            <span class="variant-badge" id="variant-badge" hidden></span>
+            <button type="button" id="cand-toggle" class="ghost-btn" hidden>候选</button>
+            <button type="button" id="daily-btn" class="daily-btn" title="今日固定种子盘">今日</button>
+          </div>
+        </div>
+
+        <div class="boss-bar" id="boss-bar" hidden>
+          <div class="boss-bar-head">
+            <span id="boss-bar-title">BOSS</span>
+            <span id="boss-bar-hp">0 / 0</span>
+          </div>
+          <div class="boss-bar-track"><div class="boss-bar-fill" id="boss-bar-fill"></div></div>
+        </div>
+
+        <div class="board-wrap">
+          <div id="board" class="board" aria-label="数独盘面"></div>
+          <div id="combo-float" class="combo-float" hidden></div>
+          <div id="board-overlay" class="board-overlay" hidden>
+            <div class="board-overlay-card">
+              <span class="board-overlay-title">通关</span>
+              <span class="board-overlay-desc" id="board-overlay-desc"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="numpad" id="numpad"></div>
+        <p class="rules" id="rules"></p>
+        <p class="hint" id="hint"></p>
+        <p class="toast" id="toast" hidden></p>
+      </section>
+
+      <section class="shop-panel">
+        <div class="shop-head">
+          <h2>升级</h2>
+        </div>
+        <div id="upgrades" class="upgrades"></div>
+      </section>
+    </main>
+  </div>
+
+  <style>
+    .hub-back {
+      position: fixed;
+      left: 12px;
+      bottom: 12px;
+      z-index: 9999;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(232, 236, 244, 0.18);
+      background: rgba(10, 14, 23, 0.78);
+      color: #E8ECF4;
+      font: 600 12px/1.2 "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+      opacity: 0.55;
+      transition: opacity 0.15s ease;
+    }
+    .hub-back:hover, .hub-back:focus-visible {
+      opacity: 1;
+      outline: 2px solid #3DE7C7;
+      outline-offset: 2px;
+    }
+    .app { position: relative; }
+  </style>
+  <script src="js/sudoku.js"></script>
+  <script src="js/economy.js"></script>
+  <script src="js/variants.js"></script>
+  <script src="js/meta.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/changelog.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
