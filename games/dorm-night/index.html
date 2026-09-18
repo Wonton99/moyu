@@ -185,6 +185,31 @@
     box-shadow: 2px 2px 0 #000;
   }
   .home-foot button:hover { border-color: var(--danger); color: var(--danger); }
+  .cta-row-sub { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ver-tag {
+    color: var(--muted); border: 1px solid var(--line-deep); padding: 2px 6px;
+    font-size: 10px; letter-spacing: 1px;
+  }
+  .dict-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .dict-tab {
+    appearance: none; border: 2px solid var(--line-deep); background: var(--panel2);
+    color: var(--muted); font-family: var(--font); font-size: 12px; font-weight: 700;
+    padding: 6px 10px; cursor: pointer; box-shadow: 2px 2px 0 #000;
+  }
+  .dict-tab.active { border-color: var(--neon); color: var(--neon); background: #0f1f18; }
+  .dict-list { display: grid; gap: 8px; }
+  .dict-item {
+    border: 2px solid var(--line-deep); background: var(--panel2); padding: 10px 12px;
+  }
+  .dict-item h3 { font-size: 13px; color: var(--neon); margin-bottom: 4px; }
+  .dict-item .cat { font-size: 10px; color: var(--gold); letter-spacing: 1px; margin-bottom: 4px; }
+  .dict-item p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .changelog { display: grid; gap: 12px; }
+  .cl-block { border: 2px solid var(--line-deep); background: var(--panel2); padding: 12px; }
+  .cl-block h3 { font-size: 13px; color: var(--gold); margin-bottom: 6px; letter-spacing: 1px; }
+  .cl-block ul { margin: 0; padding-left: 18px; }
+  .cl-block li { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 2px; }
+  .cl-block li b { color: var(--ink); }
 
   .diff-row { display: flex; gap: 6px; width: 100%; max-width: 300px; }
   .diff-btn {
@@ -540,15 +565,53 @@
       <div class="cta-row">
         <button class="btn big" id="btn-play">开始值班</button>
         <button class="btn soul" id="btn-upgrades">升级装备</button>
+        <div class="cta-row-sub">
+          <button class="btn ghost sm" id="btn-dict" type="button">术语词典</button>
+          <button class="btn ghost sm" id="btn-changelog" type="button">更新说明</button>
+        </div>
       </div>
 
       <div class="home-foot">
         <span id="meta-best">最好 —</span>
         <span id="meta-nights">累计 0 夜</span>
+        <span id="home-version" class="ver-tag">v0.0.0</span>
         <button id="btn-reset-save" type="button">清空存档</button>
       </div>
     </div>
   </section>
+
+  <!-- DICTIONARY -->
+  <div class="modal" id="modal-dict">
+    <div class="modal-card" style="width:min(640px,100%);max-height:min(88vh,680px)">
+      <div class="modal-head">
+        <div>
+          <h2>术语词典</h2>
+          <div class="hint">值班室黑话 · 点分类筛选</div>
+        </div>
+        <button class="modal-close" id="btn-close-dict" type="button">关闭</button>
+      </div>
+      <div class="modal-body">
+        <div class="dict-tabs" id="dict-tabs"></div>
+        <div class="dict-list" id="dict-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGELOG -->
+  <div class="modal" id="modal-changelog">
+    <div class="modal-card" style="width:min(560px,100%);max-height:min(88vh,640px)">
+      <div class="modal-head">
+        <div>
+          <h2>更新说明</h2>
+          <div class="hint" id="changelog-ver">版本</div>
+        </div>
+        <button class="modal-close" id="btn-close-changelog" type="button">关闭</button>
+      </div>
+      <div class="modal-body">
+        <div class="changelog" id="changelog-body"></div>
+      </div>
+    </div>
+  </div>
 
   <div class="modal" id="modal-upgrades">
     <div class="modal-card">
@@ -888,6 +951,113 @@
     };
   }
 
+  // ---------- Version / Dictionary / Changelog ----------
+  const GAME_VERSION = 'v0.9.3';
+  const VERSION_NOTES = [
+    {
+      ver: 'v0.9.3',
+      date: '最近',
+      items: [
+        '首页增加版本号、更新说明、术语词典',
+        '维修傀儡改为全局修门（无需靠近门）',
+        '维修/门恢复特效：治疗光束、门回血光晕',
+        '灯光改为手电筒式锥形光柱',
+        '修复首页无法点击的语法错误',
+      ],
+    },
+    {
+      ver: 'v0.9.2',
+      date: '像素与共防',
+      items: [
+        '背包格子摆放：建筑占地不同',
+        '开局选房 + 3 名 AI 队友共同防守',
+        '小怪 / 精英 / Boss 波次',
+        '人物解锁：开局仅实习生',
+        '难度预览像素怪物、高难度怪更多',
+      ],
+    },
+    {
+      ver: 'v0.9.0',
+      date: '像素夜班',
+      items: [
+        '像素风重制、局外残魂成长',
+        '床/门升级外观换皮、Boss 夜',
+        '暂停与倍速、教程弹窗暂停',
+      ],
+    },
+  ];
+
+  const DICT = [
+    { cat: '基础', name: '值班 / 过夜', desc: '从 22:00 值到 06:00 算过一夜。门破则本局失败。' },
+    { cat: '基础', name: '残魂', desc: '局外货币。按过夜数结算，用来升级装备或解锁人物。今日首胜有额外加成。' },
+    { cat: '基础', name: '背包格', desc: '房间地面是格子背包。建筑占不同格数，放不下就无法建造。' },
+    { cat: '基础', name: '门', desc: '你的防线。猛鬼与小怪只挠门；门血归零即失败。门在墙边不可移动，可升级换皮。' },
+    { cat: '基础', name: '床', desc: '固定占 2×3 格，被动产出金币。升级提高产钱，仍占同样格子。' },
+    { cat: '建筑', name: '符箭 1×1', desc: '单体稳定输出，省格子，适合铺数量。' },
+    { cat: '建筑', name: '寒霜 1×2', desc: '竖条占位，攻击并减速猛鬼，控场用。' },
+    { cat: '建筑', name: '镇魂 2×2', desc: '大占地高伤慢速，打精英/Boss 更划算。' },
+    { cat: '建筑', name: '雷珠 1×1', desc: '链电，可弹射附近目标，清小怪群。' },
+    { cat: '建筑', name: '毒香 1×1', desc: '附加持续中毒伤害，适合拖长战。' },
+    { cat: '建筑', name: '火盆 2×1', desc: '范围溅射，横条占位，专治小怪潮。' },
+    { cat: '建筑', name: '观煞 1×2', desc: '超远射程、高伤慢速，狙击关键目标。' },
+    { cat: '建筑', name: '维修傀儡 1×1', desc: '只要放下就全局修门，无需靠近门；可叠加。治疗光束会连到门上。' },
+    { cat: '建筑', name: '聚宝盆 2×1', desc: '提高床位产钱百分比，可叠加，理财向。' },
+    { cat: '怪物', name: '小怪', desc: '数量多、速度快、血少。用范围塔（火盆/雷珠）清理。' },
+    { cat: '怪物', name: '精英', desc: '更肉，带有护盾条（先扣盾再扣血）。建议集火或高伤塔。' },
+    { cat: '怪物', name: 'BOSS', desc: '每 3 夜出现，体型大、伤害高。击杀奖金更高。' },
+    { cat: '怪物', name: '吞噬变强', desc: 'AI 队友的门被破时，场上的猛鬼会回血并增强。' },
+    { cat: '怪物', name: '入夜狂暴', desc: '夜晚越深，怪物伤害越高（进度条变红时更危险）。' },
+    { cat: '人物', name: '实习生', desc: '开局默认。均衡无短板，开局 +10 金。' },
+    { cat: '人物', name: '夜班生', desc: '床收入 +25%。解锁：过 1 夜 + 40 残魂。' },
+    { cat: '人物', name: '保安哥', desc: '门上限 +30%，回血 +50%。解锁：过 2 夜 + 80 残魂。' },
+    { cat: '人物', name: '阿宅', desc: '全塔伤害 +15%。解锁：过 3 夜 + 120 残魂。' },
+    { cat: '人物', name: '宿管姨', desc: '维修效率 +60%，开局 +20 金。解锁：过 4 夜 + 150 残魂。' },
+    { cat: '人物', name: '猎人', desc: '攻速 +12%，开局送雷珠。解锁：过 5 夜 + 200 残魂。' },
+    { cat: '系统', name: '难度 · 胆小鬼', desc: '简单：怪更少更弱，残魂略少。适合熟悉背包与建筑。' },
+    { cat: '系统', name: '难度 · 凶灵', desc: '普通：标准波次与数值。' },
+    { cat: '系统', name: '难度 · 恶煞群', desc: '困难：小怪×约1.45、精英×约1.8，更肉更快，残魂更多。' },
+    { cat: '系统', name: '选房', desc: '开局 30 秒选房；AI 在 10~25 秒陆续抢房。房间大小/障碍/门床加成不同。' },
+    { cat: '系统', name: 'AI 队友', desc: '301/303/305 三位邻居。他们会自动输出并承担部分伤害；全灭或失守会影响局势。' },
+    { cat: '系统', name: '局外装备', desc: '用残魂升级：开局金、门上限、床收入、伤害、攻速、开局送塔等。' },
+    { cat: '系统', name: '成就', desc: '过夜、击杀 Boss、困难通关、累计残魂等条件达成后点亮。' },
+  ];
+
+  let dictCat = '基础';
+  function renderDict() {
+    const cats = [];
+    for (const d of DICT) if (!cats.includes(d.cat)) cats.push(d.cat);
+    const tabs = document.getElementById('dict-tabs');
+    const list = document.getElementById('dict-list');
+    if (!tabs || !list) return;
+    tabs.innerHTML = cats.map(c =>
+      `<button type="button" class="dict-tab ${c === dictCat ? 'active' : ''}" data-cat="${c}">${c}</button>`
+    ).join('');
+    list.innerHTML = DICT.filter(d => d.cat === dictCat).map(d =>
+      `<div class="dict-item"><div class="cat">${d.cat}</div><h3>${d.name}</h3><p>${d.desc}</p></div>`
+    ).join('');
+    tabs.querySelectorAll('[data-cat]').forEach(btn => {
+      btn.onclick = () => { dictCat = btn.dataset.cat; renderDict(); };
+    });
+  }
+
+  function renderChangelog() {
+    const verEl = document.getElementById('changelog-ver');
+    const body = document.getElementById('changelog-body');
+    if (verEl) verEl.textContent = `当前 ${GAME_VERSION}`;
+    if (!body) return;
+    body.innerHTML = VERSION_NOTES.map(v => `
+      <div class="cl-block">
+        <h3>${v.ver} · ${v.date}</h3>
+        <ul>${v.items.map(i => `<li>${i}</li>`).join('')}</ul>
+      </div>
+    `).join('');
+  }
+
+  function openDict() { renderDict(); const m = document.getElementById('modal-dict'); if (m) m.classList.add('show'); }
+  function closeDict() { const m = document.getElementById('modal-dict'); if (m) m.classList.remove('show'); }
+  function openChangelog() { renderChangelog(); const m = document.getElementById('modal-changelog'); if (m) m.classList.add('show'); }
+  function closeChangelog() { const m = document.getElementById('modal-changelog'); if (m) m.classList.remove('show'); }
+
   function todayKey() {
     const d = new Date();
     return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
@@ -951,6 +1121,8 @@
     ui.metaSouls.textContent = save.souls;
     ui.metaBest.textContent = save.bestNight > 0 ? `最好 ${save.bestNight} 夜` : '最好 —';
     ui.metaNights.textContent = `累计 ${save.totalNights} 夜`;
+    const verEl = document.getElementById('home-version');
+    if (verEl) verEl.textContent = GAME_VERSION;
     if (ui.modalSouls) ui.modalSouls.textContent = save.souls;
     const dd = diffDefs[save.difficulty] || diffDefs.normal;
     if (ui.homeBadge) ui.homeBadge.title = `难度：${dd.label}`;
@@ -1086,6 +1258,14 @@
     beginRoomSelect();
   };
   $('btn-upgrades').onclick = openUpgrades;
+  $('btn-dict').onclick = openDict;
+  $('btn-close-dict').onclick = closeDict;
+  $('btn-changelog').onclick = openChangelog;
+  $('btn-close-changelog').onclick = closeChangelog;
+  const md = document.getElementById('modal-dict');
+  const mc = document.getElementById('modal-changelog');
+  if (md) md.addEventListener('click', e => { if (e.target === md) closeDict(); });
+  if (mc) mc.addEventListener('click', e => { if (e.target === mc) closeChangelog(); });
   $('btn-close-upgrades').onclick = closeUpgrades;
   ui.modalUpgrades.addEventListener('click', e => { if (e.target === ui.modalUpgrades) closeUpgrades(); });
   $('btn-home').onclick = () => {
