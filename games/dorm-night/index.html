@@ -1,0 +1,3540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>宿舍夜班 · PIXEL</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #121820;
+    --panel2: #182028;
+    --panel3: #0e141c;
+    --line: #2a3a4c;
+    --line-deep: #05070a;
+    --ink: #e8f4ff;
+    --muted: #7a90a0;
+    --neon: #3dff9a;
+    --neon-d: #1a8f55;
+    --neon-deep: #0a3d24;
+    --gold: #f0c14b;
+    --gold-d: #8a6a20;
+    --danger: #ff4d5e;
+    --danger-d: #6a2010;
+    --soul: #b894ff;
+    --soul-d: #4a2a8a;
+    --frost: #6ecbff;
+    --cannon: #ffb347;
+    --bevel-lt: #3a4c60;
+    --bevel-dk: #05070a;
+    --font: "Cascadia Mono", "Consolas", "Courier New", "Microsoft YaHei", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%; background: var(--bg); color: var(--ink);
+    font-family: var(--font);
+    overflow: hidden;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  #app { height: 100%; position: relative; }
+  #app::after {
+    content: ""; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,.12) 0px,
+      rgba(0,0,0,.12) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: multiply;
+    opacity: .55;
+  }
+  .screen { position: absolute; inset: 0; display: none; flex-direction: column; }
+  .screen.show { display: flex; }
+
+  /* —— pixel panel frame —— */
+  .px-frame {
+    border: 2px solid var(--line-deep);
+    box-shadow:
+      inset 2px 2px 0 var(--bevel-lt),
+      inset -2px -2px 0 var(--bevel-dk),
+      4px 4px 0 #000;
+    background: var(--panel);
+  }
+  .px-frame-deep {
+    border: 2px solid var(--line-deep);
+    box-shadow:
+      inset 2px 2px 0 var(--bevel-lt),
+      inset -2px -2px 0 var(--bevel-dk),
+      6px 6px 0 #000;
+  }
+
+  /* HOME */
+  #screen-home {
+    background:
+      repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,.18) 3px 4px),
+      repeating-linear-gradient(90deg, transparent 0 15px, rgba(61,255,154,.02) 15px 16px),
+      radial-gradient(ellipse 80% 50% at 50% 0%, #12202c 0%, transparent 60%),
+      linear-gradient(180deg, #0e141c 0%, #07090e 100%);
+    overflow: auto;
+  }
+  .home-wrap {
+    width: min(440px, 100%); margin: auto; padding: 36px 18px 28px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px; min-height: 100%;
+  }
+  .hero {
+    text-align: center; width: 100%;
+    padding: 22px 16px 18px;
+    border: 2px solid var(--line-deep);
+    background:
+      repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.2) 2px 3px),
+      linear-gradient(180deg, #15202c 0%, #0c1218 100%);
+    box-shadow:
+      inset 2px 2px 0 #2a3a4c,
+      inset -2px -2px 0 #05070a,
+      6px 6px 0 #000;
+  }
+  .hero .eyebrow {
+    font-size: 10px; letter-spacing: 5px; color: var(--muted); margin-bottom: 12px;
+    text-shadow: 2px 2px 0 #000;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 8vw, 40px); letter-spacing: 8px; color: var(--neon);
+    font-weight: 900; margin-bottom: 8px;
+    text-shadow:
+      2px 0 0 var(--neon-deep),
+      0 2px 0 var(--neon-deep),
+      2px 2px 0 var(--neon-deep),
+      4px 4px 0 #000,
+      0 0 24px rgba(61,255,154,.35);
+  }
+  .hero .sub {
+    color: var(--muted); font-size: 12px; letter-spacing: 2px; line-height: 1.8;
+    text-shadow: 2px 2px 0 #000;
+  }
+  .pixel-badge {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; padding: 6px 12px;
+    border: 2px solid var(--line-deep); background: var(--panel);
+    color: var(--gold); font-size: 11px; letter-spacing: 2px; font-weight: 700;
+    box-shadow:
+      inset 2px 2px 0 var(--bevel-lt),
+      inset -2px -2px 0 var(--bevel-dk),
+      3px 3px 0 #000;
+  }
+  .pixel-badge canvas {
+    width: 72px; height: 48px;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+  }
+  .wallet { display: flex; gap: 8px; width: 100%; }
+  .wallet .chip {
+    flex: 1; padding: 10px 8px; border: 2px solid var(--line-deep); background: var(--panel);
+    text-align: center;
+    box-shadow:
+      inset 2px 2px 0 var(--bevel-lt),
+      inset -2px -2px 0 var(--bevel-dk),
+      3px 3px 0 #000;
+  }
+  .wallet .chip b {
+    display: block; font-size: 10px; color: var(--muted); letter-spacing: 3px;
+    margin-bottom: 4px; text-shadow: 1px 1px 0 #000;
+  }
+  .wallet .chip span {
+    font-size: 20px; font-weight: 900; color: var(--soul);
+    text-shadow: 2px 2px 0 #1a082a, 0 0 10px rgba(184,148,255,.4);
+  }
+  .cta-row { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 300px; }
+
+  .btn {
+    appearance: none; border: 2px solid var(--line-deep); border-radius: 0; padding: 12px 16px;
+    font-family: var(--font); font-size: 14px; font-weight: 900; letter-spacing: 3px; cursor: pointer;
+    background: var(--neon); color: #04120b;
+    box-shadow:
+      inset 2px 2px 0 #7dffb8,
+      inset -2px -2px 0 var(--neon-deep),
+      4px 4px 0 #000;
+  }
+  .btn:hover { filter: brightness(1.1); transform: translate(1px,1px); box-shadow: inset 2px 2px 0 #7dffb8, inset -2px -2px 0 var(--neon-deep), 3px 3px 0 #000; }
+  .btn:active { transform: translate(4px,4px); box-shadow: inset 2px 2px 0 #7dffb8, inset -2px -2px 0 var(--neon-deep), 0 0 0 #000; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; filter: grayscale(.4); }
+  .btn.ghost {
+    background: var(--panel); color: var(--ink); border-color: var(--line-deep);
+    box-shadow: inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 4px 4px 0 #000;
+  }
+  .btn.ghost:hover { filter: brightness(1.15); }
+  .btn.soul {
+    background: var(--soul); color: #14082a; border-color: var(--line-deep);
+    box-shadow: inset 2px 2px 0 #d4b8ff, inset -2px -2px 0 var(--soul-d), 4px 4px 0 #000;
+  }
+  .btn.warn {
+    background: #ff6b4a; color: #1a0804; border-color: var(--line-deep);
+    box-shadow: inset 2px 2px 0 #ff9a80, inset -2px -2px 0 var(--danger-d), 4px 4px 0 #000;
+  }
+  .btn.big { width: 100%; padding: 14px 18px; font-size: 16px; }
+  .btn.sm { padding: 6px 10px; font-size: 12px; letter-spacing: 2px; box-shadow: inset 2px 2px 0 #7dffb8, inset -2px -2px 0 var(--neon-deep), 2px 2px 0 #000; }
+  .btn.sm.ghost { box-shadow: inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 2px 2px 0 #000; }
+  .btn.sm.warn { box-shadow: inset 2px 2px 0 #ff9a80, inset -2px -2px 0 var(--danger-d), 2px 2px 0 #000; }
+
+  .home-foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;
+    font-size: 11px; color: var(--muted); width: 100%;
+  }
+  .home-foot button {
+    appearance: none; border: 2px solid var(--line-deep); background: #1a1214; color: #ff8a7a;
+    padding: 6px 10px; font-family: var(--font); font-size: 11px; cursor: pointer; letter-spacing: 1px;
+    box-shadow: 2px 2px 0 #000;
+  }
+  .home-foot button:hover { border-color: var(--danger); color: var(--danger); }
+
+  .diff-row { display: flex; gap: 6px; width: 100%; max-width: 300px; }
+  .diff-btn {
+    flex: 1; appearance: none; border: 2px solid var(--line-deep); background: var(--panel);
+    color: var(--muted); font-family: var(--font); font-size: 12px; font-weight: 700;
+    padding: 8px 4px; cursor: pointer; letter-spacing: 2px;
+    box-shadow: inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 2px 2px 0 #000;
+  }
+  .diff-btn.active {
+    border-color: var(--line-deep); color: var(--neon); background: #0f1f18;
+    box-shadow: inset 2px 2px 0 var(--neon-d), inset -2px -2px 0 #04120b, 2px 2px 0 #000;
+    text-shadow: 0 0 8px rgba(61,255,154,.45);
+  }
+
+  .char-row {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 6px; width: 100%; max-width: 420px;
+  }
+  .char-btn {
+    appearance: none; border: 2px solid var(--line-deep); background: var(--panel);
+    color: var(--muted); font-family: var(--font); cursor: pointer;
+    padding: 8px 4px; text-align: center; box-shadow: 2px 2px 0 #000;
+  }
+  .char-btn.active { border-color: var(--gold); color: var(--gold); background: #1a180c; }
+  .char-btn.locked { opacity: .72; }
+  .char-btn.locked .nm { color: var(--muted); }
+  .char-btn:disabled { cursor: not-allowed; }
+  .char-btn .face {
+    width: 28px; height: 28px; margin: 0 auto 4px;
+    image-rendering: pixelated; display: block;
+  }
+  .char-btn .nm { display: block; font-size: 12px; font-weight: 900; color: inherit; }
+  .char-btn .fx { display: block; font-size: 9px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
+  .section-label {
+    width: 100%; max-width: 420px; font-size: 10px; letter-spacing: 3px;
+    color: var(--muted); text-align: left;
+  }
+
+  /* room select */
+  .ai-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .ai-chip {
+    border: 2px solid var(--line-deep); background: var(--panel2); padding: 8px 10px;
+    font-size: 12px; box-shadow: inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk);
+  }
+  .ai-chip b { color: var(--ink); }
+  .ai-chip .st { color: var(--muted); font-size: 11px; }
+  .ai-chip.done { border-color: var(--soul); }
+  .ai-chip.done .st { color: var(--soul); }
+  .room-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
+  }
+  .room-card {
+    border: 2px solid var(--line-deep); background: var(--panel2); padding: 10px;
+    cursor: pointer; text-align: left; color: var(--ink); font-family: var(--font);
+    box-shadow: 3px 3px 0 #000; width: 100%;
+  }
+  .room-card:hover:not(.taken):not(.mine) { border-color: var(--neon); }
+  .room-card.mine { border-color: var(--neon); background: #0f1f18; }
+  .room-card.taken { opacity: .55; cursor: not-allowed; border-color: #3a2a2a; }
+  .room-card h3 { font-size: 14px; margin-bottom: 4px; letter-spacing: 1px; }
+  .room-card .meta { font-size: 11px; color: var(--muted); line-height: 1.45; }
+  .room-map {
+    display: grid; gap: 2px; margin: 8px 0;
+    background: #070a0e; border: 2px solid var(--line-deep); padding: 6px;
+    min-height: 100px;
+  }
+  .room-map .cell {
+    min-height: 14px; min-width: 10px;
+    background: #152028;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  .room-map .cell.block { background: #4a3018; box-shadow: inset 0 0 0 1px #2a1810; }
+  .room-map .cell.bed { background: #2a8a5a; box-shadow: inset 0 0 0 1px #14563a; }
+  .room-map .cell.door { background: #c45c26; box-shadow: inset 0 0 0 1px #5a2a12; }
+  .room-map .cell.free { background: #121a22; }
+  .room-legend {
+    display: flex; flex-wrap: wrap; gap: 8px; font-size: 10px; color: var(--muted);
+    margin-top: 4px;
+  }
+  .room-legend i {
+    display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px;
+  }
+  .room-card canvas {
+    width: 100%; height: 90px; margin: 4px 0 0; image-rendering: pixelated;
+    background: #070a0e; border: 1px solid var(--line-deep); display: block;
+  }
+  .room-card .owner { font-size: 11px; font-weight: 700; margin-top: 4px; min-height: 14px; }
+  .room-card.mine .owner { color: var(--neon); }
+  .room-card.taken .owner { color: var(--soul); }
+  .room-tip { margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .teammate-list { margin-top: 6px; display: grid; gap: 4px; }
+  .tm {
+    display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 11px;
+    border: 2px solid var(--line-deep); background: var(--panel2); padding: 6px 8px;
+  }
+  .tm .bar { grid-column: 1 / -1; height: 6px; background: #0a1016; }
+  .tm .bar > i { display: block; height: 100%; background: var(--neon); width: 100%; }
+  .tm.dead { opacity: .55; }
+  .tm.dead .bar > i { background: var(--danger); }
+
+  /* MODALS */
+  .modal {
+    position: fixed; inset: 0; z-index: 30; display: none;
+    align-items: center; justify-content: center;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 2px, transparent 2px 4px),
+      rgba(5,8,12,.88);
+    padding: 16px;
+  }
+  .modal.show { display: flex; }
+  .modal-card {
+    width: min(520px, 100%); max-height: min(86vh, 640px);
+    border: 2px solid var(--line-deep); background: var(--panel);
+    box-shadow:
+      inset 2px 2px 0 var(--bevel-lt),
+      inset -2px -2px 0 var(--bevel-dk),
+      8px 8px 0 #000;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modal-card.confirm-card { width: min(360px, 100%); text-align: center; padding: 22px 16px; gap: 10px; }
+  .confirm-card h3 { color: var(--danger); font-size: 18px; letter-spacing: 3px; text-shadow: 2px 2px 0 #000; }
+  .confirm-card p { color: var(--muted); font-size: 12px; line-height: 1.8; }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 14px; border-bottom: 2px solid var(--line-deep);
+    background: var(--panel3);
+  }
+  .modal-head h2 { font-size: 13px; letter-spacing: 3px; text-shadow: 2px 2px 0 #000; }
+  .modal-head .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .modal-body { padding: 12px 14px 16px; overflow: auto; }
+  .modal-close {
+    appearance: none; border: 2px solid var(--line-deep); background: var(--panel2); color: var(--ink);
+    padding: 6px 10px; font-family: var(--font); font-size: 12px; cursor: pointer;
+    box-shadow: inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 2px 2px 0 #000;
+  }
+  .modal-close:hover { color: var(--danger); }
+  .upgrade-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .up-card {
+    border: 2px solid var(--line-deep); background: var(--panel2); padding: 12px;
+    display: flex; flex-direction: column; gap: 6px;
+    box-shadow: inset 2px 2px 0 #2a3a4c, inset -2px -2px 0 #05070a, 3px 3px 0 #000;
+  }
+  .up-card.maxed { border-color: var(--line-deep); box-shadow: inset 2px 2px 0 var(--neon-d), inset -2px -2px 0 #04120b, 3px 3px 0 #000; }
+  .up-card .top { display: flex; justify-content: space-between; gap: 6px; }
+  .up-card h3 { font-size: 13px; text-shadow: 1px 1px 0 #000; }
+  .up-card .lv { font-size: 11px; color: var(--soul); font-weight: 700; }
+  .up-card p { font-size: 11px; color: var(--muted); line-height: 1.45; flex: 1; }
+  .up-card .effect { font-size: 12px; color: var(--ink); font-weight: 700; }
+  .up-card .buy {
+    width: 100%; margin-top: 4px; border: 2px solid var(--line-deep); background: var(--soul);
+    color: #14082a; font-family: var(--font); font-weight: 700; font-size: 12px; letter-spacing: 1px;
+    padding: 8px; cursor: pointer;
+    box-shadow: inset 2px 2px 0 #d4b8ff, inset -2px -2px 0 var(--soul-d), 2px 2px 0 #000;
+  }
+  .up-card .buy:disabled { opacity: .4; cursor: not-allowed; filter: grayscale(.5); }
+  .ach-list { display: grid; gap: 6px; margin-top: 14px; }
+  .ach {
+    border: 2px solid var(--line-deep); background: var(--panel2); padding: 8px 10px;
+    font-size: 12px; display: flex; justify-content: space-between; gap: 8px;
+    box-shadow: inset 2px 2px 0 #2a3a4c, inset -2px -2px 0 #05070a;
+  }
+  .ach.done {
+    border-color: var(--line-deep); color: var(--neon);
+    box-shadow: inset 2px 2px 0 var(--neon-d), inset -2px -2px 0 #04120b;
+  }
+  .ach span { color: var(--muted); }
+
+  /* GAME */
+  #screen-game.show { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; }
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 8px 10px; border-bottom: 2px solid var(--line-deep); background: var(--panel);
+  }
+  .brand strong {
+    font-size: 13px; letter-spacing: 3px; color: var(--neon);
+    text-shadow: 2px 2px 0 var(--neon-deep), 0 0 10px rgba(61,255,154,.3);
+  }
+  .brand span { display: block; font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+  .stats { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .chip {
+    min-width: 64px; padding: 4px 8px; border: 2px solid var(--line-deep); background: var(--panel2);
+    box-shadow: inset 2px 2px 0 #2a3a4c, inset -2px -2px 0 #05070a, 2px 2px 0 #000;
+  }
+  .chip b { display: block; font-size: 9px; color: var(--muted); letter-spacing: 2px; margin-bottom: 2px; }
+  .chip span {
+    font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums;
+    text-shadow: 1px 1px 0 #000;
+  }
+  .chip.gold span { color: var(--gold); }
+  .chip.hp span { color: var(--danger); }
+  .chip.wave span { color: var(--neon); }
+  .chip.clock span { color: var(--ink); }
+  .chip.boss span { color: var(--soul); }
+
+  main {
+    position: relative; display: grid;
+    grid-template-columns: minmax(0, 1fr) 230px;
+    min-height: 0; height: 100%;
+  }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; } }
+  .stage-wrap { position: relative; min-height: 0; height: 100%; background: #05070a; overflow: hidden; }
+  .stage-wrap::before {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    box-shadow: inset 0 0 0 2px #000, inset 0 0 0 4px #1a2430;
+  }
+  .stage-wrap canvas#game {
+    display: block; cursor: crosshair;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    image-rendering: -moz-crisp-edges;
+    position: absolute; left: 0; top: 0;
+    transform: translateZ(0);
+  }
+  /* other canvases (home monster, portraits, room preview) stay in normal flow */
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .overlay {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.2) 0 2px, transparent 2px 4px),
+      rgba(5,8,12,.82);
+    z-index: 5; padding: 12px;
+  }
+  .overlay.show { display: flex; }
+  .card {
+    width: min(420px, 100%); padding: 22px 18px; border: 2px solid var(--line-deep);
+    background: var(--panel); text-align: center;
+    box-shadow: inset 2px 2px 0 var(--bevel-lt), inset -2px -2px 0 var(--bevel-dk), 6px 6px 0 #000;
+  }
+  .card h1 { font-size: 22px; margin-bottom: 8px; letter-spacing: 4px; text-shadow: 2px 2px 0 #000; }
+  .card p { color: var(--muted); font-size: 12px; line-height: 1.8; margin-bottom: 12px; }
+  .card .win { color: var(--neon); text-shadow: 0 0 12px rgba(61,255,154,.4); }
+  .card .lose { color: var(--danger); text-shadow: 0 0 12px rgba(255,77,94,.4); }
+  .card .gain {
+    margin: 0 0 12px; padding: 10px; border: 2px solid var(--line-deep); background: var(--soul);
+    color: #14082a; font-weight: 900; font-size: 14px;
+    box-shadow: inset 2px 2px 0 #d4b8ff, inset -2px -2px 0 var(--soul-d), 3px 3px 0 #000;
+  }
+  .btn-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+  .btn-row .btn { margin: 0; }
+  /* oversized CTA on overlays (tutorial / win / lose) */
+  .overlay .btn {
+    min-width: 200px;
+    min-height: 48px;
+    padding: 14px 28px;
+    font-size: 16px;
+    letter-spacing: 3px;
+  }
+  .overlay .btn.big-cta {
+    min-width: 240px;
+    min-height: 56px;
+    padding: 16px 36px;
+    font-size: 18px;
+  }
+  .tutorial-steps { text-align: left; margin: 0 0 14px; padding: 0; list-style: none; }
+  .tutorial-steps li {
+    padding: 8px 10px; margin-bottom: 6px; border: 2px solid var(--line-deep);
+    background: var(--panel2); font-size: 12px; color: var(--ink); line-height: 1.5;
+    box-shadow: inset 2px 2px 0 #2a3a4c, inset -2px -2px 0 #05070a;
+  }
+  .tutorial-steps li b { color: var(--neon); }
+
+  aside {
+    border-left: 2px solid var(--line-deep); background: var(--panel);
+    padding: 8px; overflow: auto; display: flex; flex-direction: column; gap: 8px;
+    min-height: 0;
+  }
+  @media (max-width: 860px) {
+    aside { border-left: none; border-top: 2px solid var(--line-deep); max-height: 200px; }
+  }
+  aside h2 { font-size: 10px; letter-spacing: 3px; color: var(--muted); text-shadow: 1px 1px 0 #000; }
+  .shop { display: grid; gap: 6px; margin-top: 6px; }
+  .item {
+    width: 100%; text-align: left; border: 2px solid var(--line-deep); background: var(--panel2);
+    color: var(--ink); padding: 8px 10px; cursor: pointer; font-family: var(--font);
+    box-shadow: inset 2px 2px 0 #2a3a4c, inset -2px -2px 0 #05070a, 2px 2px 0 #000;
+  }
+  .item:hover:not(:disabled) {
+    box-shadow: inset 2px 2px 0 var(--neon-d), inset -2px -2px 0 #04120b, 2px 2px 0 #000;
+  }
+  .item:disabled { opacity: .4; cursor: not-allowed; filter: grayscale(.35); }
+  .item.selected {
+    background: #0f1f18;
+    box-shadow: inset 2px 2px 0 var(--neon), inset -2px -2px 0 var(--neon-deep), 2px 2px 0 #000;
+  }
+  .item .top { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 2px; }
+  .item .name { font-weight: 900; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .item .dot { width: 8px; height: 8px; display: inline-block; box-shadow: 1px 1px 0 #000; }
+  .item .cost { color: var(--gold); font-weight: 900; font-size: 12px; text-shadow: 1px 1px 0 #000; }
+  .item .desc { color: var(--muted); font-size: 10px; line-height: 1.4; }
+  .panel-box {
+    border: 2px solid var(--line-deep); background: var(--panel2); padding: 10px;
+    box-shadow: inset 2px 2px 0 #2a3a4c, inset -2px -2px 0 #05070a, 2px 2px 0 #000;
+  }
+  .panel-box h3 { font-size: 12px; margin-bottom: 4px; }
+  .panel-box p { font-size: 10px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+  .panel-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .panel-actions .btn { width: 100%; }
+  .log {
+    border-top: 2px solid var(--line-deep); padding-top: 8px; max-height: 120px; overflow: auto;
+    font-size: 10px; color: var(--muted); line-height: 1.6;
+  }
+  .log .good { color: var(--neon); }
+  .log .bad { color: var(--danger); }
+  .log .goldc { color: var(--gold); }
+  .log .soulc { color: var(--soul); }
+
+  footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 6px 10px; border-top: 2px solid var(--line-deep); background: var(--panel);
+    font-size: 11px; color: var(--muted);
+  }
+  footer .controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  kbd {
+    border: 2px solid var(--line-deep); padding: 0 4px;
+    background: var(--panel2); color: var(--ink); font-family: var(--font); font-size: 10px;
+    box-shadow: inset 1px 1px 0 var(--bevel-lt), inset -1px -1px 0 var(--bevel-dk);
+  }
+  @media (prefers-reduced-motion: reduce) { .btn, .item, .diff-btn { transition: none; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <a class="hub-back" href="../../" title="返回游戏合集">← 合集</a>
+
+  <section class="screen show" id="screen-home">
+    <div class="home-wrap">
+      <div class="hero">
+        <div class="eyebrow">PIXEL NIGHT SHIFT</div>
+        <h1>宿舍夜班</h1>
+        <div class="sub">躺床攒钱 · 造炮守门 · 撑到天亮</div>
+        <div class="pixel-badge" id="home-badge">
+          <canvas id="diff-monster" width="48" height="32"></canvas>
+          <span id="diff-label">简单 · 普通小鬼</span>
+        </div>
+      </div>
+
+      <div class="wallet">
+        <div class="chip"><b>残魂</b><span id="meta-souls">0</span></div>
+      </div>
+
+      <div class="diff-row" id="diff-row">
+        <button class="diff-btn" data-diff="easy">简单</button>
+        <button class="diff-btn" data-diff="normal">普通</button>
+        <button class="diff-btn" data-diff="hard">困难</button>
+      </div>
+
+      <div class="section-label" id="char-label">值班人员 · 开局仅实习生，其余需解锁</div>
+      <div class="char-row" id="char-row"></div>
+
+      <div class="cta-row">
+        <button class="btn big" id="btn-play">开始值班</button>
+        <button class="btn soul" id="btn-upgrades">升级装备</button>
+      </div>
+
+      <div class="home-foot">
+        <span id="meta-best">最好 —</span>
+        <span id="meta-nights">累计 0 夜</span>
+        <button id="btn-reset-save" type="button">清空存档</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal" id="modal-upgrades">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h2>宿舍装备</h2>
+          <div class="hint">残魂 <span id="modal-souls" style="color:var(--soul);font-weight:900">0</span> · 每局自动生效</div>
+        </div>
+        <button class="modal-close" id="btn-close-upgrades" type="button">关闭</button>
+      </div>
+      <div class="modal-body">
+        <div class="upgrade-grid" id="upgrade-grid"></div>
+        <div style="margin-top:16px">
+          <h2 style="font-size:11px;letter-spacing:3px;color:var(--muted);margin-bottom:8px">成就</h2>
+          <div class="ach-list" id="ach-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-reset">
+    <div class="modal-card confirm-card">
+      <h3>清空存档？</h3>
+      <p>将删除残魂、局外升级、成就与历史战绩。<br/><b style="color:var(--danger)">不可恢复</b>。</p>
+      <div class="btn-row">
+        <button class="btn warn" id="btn-reset-confirm" type="button">确认清空</button>
+        <button class="btn ghost" id="btn-reset-cancel" type="button">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOM SELECT -->
+  <div class="modal" id="modal-rooms">
+    <div class="modal-card" style="width:min(860px,100%);max-height:min(92vh,780px)">
+      <div class="modal-head">
+        <div>
+          <h2>选房入伙 · 共同值夜</h2>
+          <div class="hint">
+            倒计时 <b id="room-timer" style="color:var(--gold);font-size:14px">30</b> 秒 ·
+            AI 队友会在 10~25 秒陆续抢房 · 房间大小/形状不同
+          </div>
+        </div>
+        <button class="modal-close" id="btn-rooms-lock" type="button">锁定入场</button>
+      </div>
+      <div class="modal-body">
+        <div id="ai-status-row" class="ai-row"></div>
+        <div class="room-grid" id="room-grid"></div>
+        <div class="room-tip" id="room-tip">点选一间空房作为你的宿舍；被 AI 选走的无法再选。</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="screen" id="screen-game">
+    <header>
+      <div class="brand">
+        <strong>宿舍夜班</strong>
+        <span id="ui-diff">普通 · 302</span>
+      </div>
+      <div class="stats">
+        <div class="chip clock"><b>时刻</b><span id="ui-clock">22:00</span></div>
+        <div class="chip gold"><b>金币</b><span id="ui-gold">50</span></div>
+        <div class="chip"><b>收入</b><span id="ui-income">6/s</span></div>
+        <div class="chip"><b>床</b><span id="ui-bed">1</span></div>
+        <div class="chip hp"><b>门</b><span id="ui-door">100/100</span></div>
+        <div class="chip wave"><b>夜</b><span id="ui-wave">1</span></div>
+        <div class="chip boss"><b>鬼</b><span id="ui-ghost">—</span></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="stage-wrap">
+        <canvas id="game" width="960" height="540"></canvas>
+        <div class="overlay" id="overlay"><div class="card" id="card"></div></div>
+      </div>
+
+      <aside>
+        <div>
+          <h2>操作台</h2>
+          <div class="shop">
+            <button class="item" id="btn-up-bed">
+              <div class="top"><span class="name" id="bed-name">升床</span><span class="cost" id="bed-cost">80</span></div>
+              <div class="desc" id="bed-desc">提高产钱</div>
+            </button>
+            <button class="item" id="btn-up-door">
+              <div class="top"><span class="name" id="door-name">加固门</span><span class="cost" id="door-cost">60</span></div>
+              <div class="desc" id="door-desc">提高门上限</div>
+            </button>
+            <button class="item" data-tower="arrow">
+              <div class="top"><span class="name"><i class="dot" style="background:#3dff9a"></i>符箭 1×1</span><span class="cost">40</span></div>
+              <div class="desc">小巧单体 · 省格子</div>
+            </button>
+            <button class="item" data-tower="frost">
+              <div class="top"><span class="name"><i class="dot" style="background:#6ecbff"></i>寒霜 1×2</span><span class="cost">70</span></div>
+              <div class="desc">竖条占位 · 减速控场</div>
+            </button>
+            <button class="item" data-tower="cannon">
+              <div class="top"><span class="name"><i class="dot" style="background:#ffb347"></i>镇魂 2×2</span><span class="cost">120</span></div>
+              <div class="desc">大占地 · 高伤</div>
+            </button>
+            <button class="item" data-tower="repair">
+              <div class="top"><span class="name"><i class="dot" style="background:#7dffa0"></i>维修 1×1</span><span class="cost">90</span></div>
+              <div class="desc">只要放下就全局修门</div>
+            </button>
+            <button class="item" data-tower="idol">
+              <div class="top"><span class="name"><i class="dot" style="background:#f0c14b"></i>聚宝 2×1</span><span class="cost">100</span></div>
+              <div class="desc">横条占位 · 收入加成</div>
+            </button>
+            <button class="item" data-tower="spark">
+              <div class="top"><span class="name"><i class="dot" style="background:#e8ff6a"></i>雷珠 1×1</span><span class="cost">85</span></div>
+              <div class="desc">链电 · 可弹射1次</div>
+            </button>
+            <button class="item" data-tower="poison">
+              <div class="top"><span class="name"><i class="dot" style="background:#8b5cf6"></i>毒香 1×1</span><span class="cost">75</span></div>
+              <div class="desc">持续中毒伤害</div>
+            </button>
+            <button class="item" data-tower="brazier">
+              <div class="top"><span class="name"><i class="dot" style="background:#ff6b2c"></i>火盆 2×1</span><span class="cost">110</span></div>
+              <div class="desc">范围溅射 · 清小怪</div>
+            </button>
+            <button class="item" data-tower="eye">
+              <div class="top"><span class="name"><i class="dot" style="background:#ff4d8d"></i>观煞 1×2</span><span class="cost">140</span></div>
+              <div class="desc">超远射程 · 高伤慢速</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-box" id="select-panel" style="display:none">
+          <h3 id="sel-title">—</h3>
+          <p id="sel-desc"></p>
+          <div class="panel-actions">
+            <button class="btn sm" id="btn-upgrade-tower">升级</button>
+            <button class="btn sm warn" id="btn-sell-tower">出售</button>
+          </div>
+        </div>
+
+        <div class="log" id="log"></div>
+        <div>
+          <h2>我的房间</h2>
+          <canvas id="room-mini" width="160" height="80" style="width:100%;height:72px;image-rendering:pixelated;border:2px solid var(--line-deep);background:#070a0e;display:block;margin-top:6px"></canvas>
+          <div id="room-mini-label" style="font-size:11px;color:var(--muted);margin-top:4px">未选房</div>
+        </div>
+        <div>
+          <h2>AI 队友</h2>
+          <div class="teammate-list" id="teammate-list"></div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="controls">
+        <button class="btn sm ghost" id="btn-home">首页</button>
+        <button class="btn sm" id="btn-pause">暂停</button>
+        <button class="btn sm" id="btn-speed">1x</button>
+        <span style="margin-left:4px">房间=背包格 · 床2×3 · 门墙边 · 点格子摆放</span>
+      </div>
+      <div>
+        <kbd>1</kbd>-<kbd>9</kbd>建筑 ·
+        <kbd>P</kbd>暂停 ·
+        <kbd>F</kbd>倍速 ·
+        <kbd>Esc</kbd>取消
+      </div>
+    </footer>
+  </section>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SAVE_KEY = 'sushe_yeban_pixel_v1';
+
+  const $ = id => document.getElementById(id);
+  const ui = {
+    gold: $('ui-gold'), income: $('ui-income'), bed: $('ui-bed'), door: $('ui-door'),
+    wave: $('ui-wave'), ghost: $('ui-ghost'), clock: $('ui-clock'), diff: $('ui-diff'),
+    overlay: $('overlay'), card: $('card'), log: $('log'),
+    bedName: $('bed-name'), bedCost: $('bed-cost'), bedDesc: $('bed-desc'),
+    doorName: $('door-name'), doorCost: $('door-cost'), doorDesc: $('door-desc'),
+    selPanel: $('select-panel'), selTitle: $('sel-title'), selDesc: $('sel-desc'),
+    btnUpTower: $('btn-upgrade-tower'), btnSellTower: $('btn-sell-tower'),
+    metaSouls: $('meta-souls'), metaBest: $('meta-best'), metaNights: $('meta-nights'),
+    upgradeGrid: $('upgrade-grid'), achList: $('ach-list'),
+    screenHome: $('screen-home'), screenGame: $('screen-game'),
+    modalUpgrades: $('modal-upgrades'), modalSouls: $('modal-souls'), modalReset: $('modal-reset'),
+    homeBadge: $('home-badge'), btnPause: $('btn-pause'), btnSpeed: $('btn-speed'),
+    diffMonster: $('diff-monster'), diffLabel: $('diff-label'),
+  };
+
+  // ---------- Audio ----------
+  let audioCtx = null;
+  let bgmOn = true;
+  let bgmTimer = null;
+  function ensureAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function beep(freq = 440, dur = 0.06, type = 'square', gain = 0.03) {
+    try {
+      const ac = ensureAudio();
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.value = gain;
+      g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+      o.connect(g); g.connect(ac.destination);
+      o.start(); o.stop(ac.currentTime + dur);
+    } catch (_) {}
+  }
+  function startBgm() {
+    stopBgm();
+    if (!bgmOn) return;
+    const notes = [110, 0, 110, 0, 98, 0, 87, 0, 110, 0, 130, 0, 98, 0, 87, 0];
+    let i = 0;
+    bgmTimer = setInterval(() => {
+      if (state.phase !== 'playing' || state.paused) return;
+      const f = notes[i % notes.length];
+      i++;
+      if (f) beep(f, 0.12, 'triangle', 0.012);
+    }, 380);
+  }
+  function stopBgm() {
+    if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+  }
+
+  // ---------- Save / Meta ----------
+  const defaultSave = () => ({
+    souls: 0,
+    bestNight: 0,
+    totalNights: 0,
+    runs: 0,
+    difficulty: 'normal',
+    character: 'intern',
+    unlocked: ['intern'],
+    tutSeen: false,
+    dailyClaim: '',
+    ach: {},
+    ups: { wallet: 0, door: 0, bed: 0, power: 0, haste: 0, charm: 0 },
+  });
+  function loadSave() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return defaultSave();
+      const data = JSON.parse(raw);
+      const base = defaultSave();
+      const unlocked = Array.isArray(data.unlocked) && data.unlocked.length
+        ? data.unlocked : ['intern'];
+      if (!unlocked.includes('intern')) unlocked.unshift('intern');
+      let character = data.character || 'intern';
+      if (!unlocked.includes(character)) character = 'intern';
+      return {
+        ...base,
+        ...data,
+        unlocked,
+        character,
+        ups: { ...base.ups, ...(data.ups || {}) },
+        ach: { ...(data.ach || {}) },
+      };
+    } catch (_) { return defaultSave(); }
+  }
+  let save = loadSave();
+  function persist() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (_) {}
+  }
+
+  const diffDefs = {
+    easy:   { label: '简单', title: '胆小鬼', hpMul: 0.75, dmgMul: 0.7, speedMul: 0.85, soulMul: 0.8, night: 90, spawnMul: 0.75, eliteMul: 0.5 },
+    normal: { label: '普通', title: '凶灵', hpMul: 1, dmgMul: 1, speedMul: 1, soulMul: 1, night: 100, spawnMul: 1, eliteMul: 1 },
+    hard:   { label: '困难', title: '恶煞群', hpMul: 1.35, dmgMul: 1.25, speedMul: 1.15, soulMul: 1.4, night: 110, spawnMul: 1.45, eliteMul: 1.8 },
+  };
+
+  const metaDefs = [
+    { id: 'wallet', name: '皱零钱', desc: '开局金币+25/级', effect: lv => `开局+${lv*25}金`, cost: lv => 30+lv*25, max: 8 },
+    { id: 'door', name: '厚门板', desc: '门上限+20/级', effect: lv => `门+${lv*20}`, cost: lv => 40+lv*30, max: 8 },
+    { id: 'bed', name: '弹簧床', desc: '床收入+2/s/级', effect: lv => `收入+${lv*2}/s`, cost: lv => 50+lv*35, max: 8 },
+    { id: 'power', name: '朱砂符水', desc: '全塔伤害+8%/级', effect: lv => `伤害+${lv*8}%`, cost: lv => 60+lv*40, max: 10 },
+    { id: 'haste', name: '手速训练', desc: '攻速+6%/级', effect: lv => `攻速+${lv*6}%`, cost: lv => 70+lv*45, max: 10 },
+    { id: 'charm', name: '护身符', desc: '开局送符箭塔', effect: lv => `送塔×${lv}`, cost: lv => 80+lv*50, max: 3 },
+  ];
+
+  const achDefs = [
+    { id: 'night1', name: '第一夜', desc: '撑过至少 1 夜', check: () => save.bestNight >= 1 },
+    { id: 'night3', name: '老油条', desc: '最好成绩 ≥ 3 夜', check: () => save.bestNight >= 3 },
+    { id: 'boss', name: '屠鬼者', desc: '击杀过 Boss', check: () => !!save.ach.bossKill },
+    { id: 'rich', name: '小有积蓄', desc: '残魂累计获得过 200', check: () => (save.ach.soulsEarned || 0) >= 200 },
+    { id: 'hard', name: '地狱值班', desc: '困难难度过 1 夜', check: () => !!save.ach.hardClear },
+    { id: 'meta5', name: '装备控', desc: '任意局外强化 ≥ 5 级', check: () => Object.values(save.ups).some(v => v >= 5) },
+  ];
+
+  const charDefs = [
+    { id: 'intern', name: '实习生', fx: '均衡无短板\n开局+10金', face: '#e8d0b0', hair: '#5a4a38',
+      unlockCost: 0, unlockNight: 0,
+      bonus: { startGold: 10 } },
+    { id: 'student', name: '夜班生', fx: '床收入+25%', face: '#f0d0a0', hair: '#3a2818',
+      unlockCost: 40, unlockNight: 1,
+      bonus: { bedMul: 1.25 } },
+    { id: 'guard', name: '保安哥', fx: '门上限+30%\n门回血+50%', face: '#c89070', hair: '#1a1a1a',
+      unlockCost: 80, unlockNight: 2,
+      bonus: { doorMul: 1.3, regenMul: 1.5 } },
+    { id: 'nerd', name: '阿宅', fx: '全塔伤害+15%', face: '#e8c8b0', hair: '#4a3060',
+      unlockCost: 120, unlockNight: 3,
+      bonus: { dmgMul: 1.15 } },
+    { id: 'cook', name: '宿管姨', fx: '维修效率+60%\n开局+20金', face: '#e0b090', hair: '#5a4030',
+      unlockCost: 150, unlockNight: 4,
+      bonus: { repairMul: 1.6, startGold: 20 } },
+    { id: 'hunter', name: '猎人', fx: '攻速+12%\n开局送雷珠', face: '#b88868', hair: '#2a4a28',
+      unlockCost: 200, unlockNight: 5,
+      bonus: { cdMul: 0.88, freeSpark: 1 } },
+  ];
+  function isCharUnlocked(id) {
+    return (save.unlocked || ['intern']).includes(id);
+  }
+  function charUnlockReady(c) {
+    return save.bestNight >= (c.unlockNight || 0);
+  }
+  function charDef() {
+    const id = isCharUnlocked(save.character) ? save.character : 'intern';
+    return charDefs.find(c => c.id === id) || charDefs[0];
+  }
+
+  function metaBonus() {
+    const ch = (charDef() && charDef().bonus) || {};
+    return {
+      startGold: 50 + save.ups.wallet * 25 + (ch.startGold || 0),
+      doorBonus: save.ups.door * 20,
+      doorMul: ch.doorMul || 1,
+      bedBonus: save.ups.bed * 2,
+      bedMul: ch.bedMul || 1,
+      dmgMul: (1 + save.ups.power * 0.08) * (ch.dmgMul || 1),
+      cdMul: Math.max(0.45, (1 - save.ups.haste * 0.06) * (ch.cdMul || 1)),
+      repairMul: ch.repairMul || 1,
+      regenMul: ch.regenMul || 1,
+      freeArrows: save.ups.charm,
+      freeSpark: ch.freeSpark || 0,
+    };
+  }
+
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+
+  function drawDiffMonster(diffId) {
+    const cv = ui.diffMonster || document.getElementById('diff-monster');
+    if (!cv) return;
+    const g = cv.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.clearRect(0, 0, 48, 32);
+    const P = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+
+    if (diffId === 'easy') {
+      // 1 small timid blob
+      P(16, 12, 16, 14, '#6a9a78');
+      P(18, 10, 12, 4, '#6a9a78');
+      P(20, 16, 3, 3, '#e8f0e8');
+      P(26, 16, 3, 3, '#e8f0e8');
+      P(22, 22, 4, 2, '#3a5a48');
+      P(18, 26, 4, 2, '#4a6a58');
+      P(28, 26, 4, 2, '#4a6a58');
+    } else if (diffId === 'normal') {
+      // main ghost + 1 minion
+      P(14, 8, 16, 16, '#8b6cf0');
+      P(16, 6, 12, 4, '#8b6cf0');
+      P(18, 12, 3, 4, '#ffd6e7');
+      P(24, 12, 3, 4, '#ffd6e7');
+      P(20, 18, 5, 3, '#3a1020');
+      P(16, 24, 4, 4, '#6b4fd4');
+      P(26, 24, 4, 4, '#6b4fd4');
+      // minion
+      P(34, 18, 8, 8, '#7a9bb8');
+      P(35, 20, 2, 2, '#fff');
+      P(39, 20, 2, 2, '#fff');
+    } else {
+      // boss + elites swarm
+      P(12, 6, 20, 20, '#c23b4a');
+      P(14, 4, 16, 4, '#c23b4a');
+      P(14, 2, 4, 4, '#f0c14b');
+      P(22, 2, 4, 4, '#f0c14b');
+      P(30, 2, 4, 4, '#f0c14b');
+      P(16, 10, 4, 5, '#ffe0e8');
+      P(26, 10, 4, 5, '#ffe0e8');
+      P(18, 18, 8, 4, '#3a0810');
+      P(14, 26, 6, 4, '#8a2030');
+      P(26, 26, 6, 4, '#8a2030');
+      // elites
+      P(2, 16, 10, 10, '#e8a040');
+      P(4, 18, 2, 2, '#1a1020');
+      P(8, 18, 2, 2, '#1a1020');
+      P(36, 12, 10, 10, '#e8a040');
+      P(38, 14, 2, 2, '#1a1020');
+      P(42, 14, 2, 2, '#1a1020');
+      P(36, 24, 8, 6, '#7a9bb8');
+      P(4, 26, 8, 4, '#7a9bb8');
+    }
+  }
+
+  function renderHome() {
+    ui.metaSouls.textContent = save.souls;
+    ui.metaBest.textContent = save.bestNight > 0 ? `最好 ${save.bestNight} 夜` : '最好 —';
+    ui.metaNights.textContent = `累计 ${save.totalNights} 夜`;
+    if (ui.modalSouls) ui.modalSouls.textContent = save.souls;
+    const dd = diffDefs[save.difficulty] || diffDefs.normal;
+    if (ui.homeBadge) ui.homeBadge.title = `难度：${dd.label}`;
+    const dLabel = document.getElementById('diff-label');
+    if (dLabel) dLabel.textContent = `${dd.label} · ${dd.title}`;
+    drawDiffMonster(save.difficulty || 'normal');
+    document.querySelectorAll('.diff-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.diff === save.difficulty);
+    });
+
+    const charRow = document.getElementById('char-row');
+    if (charRow) {
+      if (!Array.isArray(save.unlocked) || !save.unlocked.includes('intern')) {
+        save.unlocked = ['intern'];
+        if (!isCharUnlocked(save.character)) save.character = 'intern';
+        persist();
+      }
+      charRow.innerHTML = charDefs.map(c => {
+        const unlocked = isCharUnlocked(c.id);
+        const on = c.id === save.character && unlocked;
+        const ready = charUnlockReady(c);
+        const canBuy = unlocked || (ready && save.souls >= (c.unlockCost || 0));
+        let foot = '';
+        if (!unlocked) {
+          if (c.unlockCost === 0) foot = '默认';
+          else if (!ready) foot = `需过 ${c.unlockNight} 夜`;
+          else foot = `解锁 ${c.unlockCost} 魂`;
+        }
+        return `<button class="char-btn ${on?'active':''} ${!unlocked?'locked':''}" data-char="${c.id}" type="button" ${!unlocked && !canBuy ? 'disabled' : ''}>
+          <canvas class="face" width="16" height="16" data-face="${c.id}"></canvas>
+          <span class="nm">${unlocked ? '' : '🔒'}${c.name}</span>
+          <span class="fx">${c.fx.replace(/\n/g,'<br/>')}${foot ? `<br/><b style="color:var(--gold)">${foot}</b>` : ''}</span>
+        </button>`;
+      }).join('');
+      charRow.querySelectorAll('canvas[data-face]').forEach(cv => {
+        const def = charDefs.find(c => c.id === cv.dataset.face);
+        const g = cv.getContext('2d');
+        const unlocked = isCharUnlocked(def.id);
+        g.imageSmoothingEnabled = false;
+        g.clearRect(0, 0, 16, 16);
+        g.fillStyle = unlocked ? '#0b0e14' : '#080a0c'; g.fillRect(0, 0, 16, 16);
+        if (!unlocked) {
+          g.fillStyle = '#2a3038'; g.fillRect(4, 5, 8, 8);
+          g.fillStyle = '#1a2028'; g.fillRect(3, 3, 10, 4);
+          g.fillStyle = '#f0c14b'; g.fillRect(6, 7, 4, 4); g.fillRect(7, 5, 2, 3);
+          return;
+        }
+        g.fillStyle = def.face; g.fillRect(4, 5, 8, 8);
+        g.fillStyle = def.hair; g.fillRect(3, 3, 10, 4); g.fillRect(3, 5, 2, 4);
+        g.fillStyle = '#1a1020'; g.fillRect(6, 8, 2, 2); g.fillRect(9, 8, 2, 2);
+        g.fillStyle = '#c07070'; g.fillRect(7, 11, 3, 1);
+        g.fillStyle = '#2a3a48'; g.fillRect(3, 13, 10, 3);
+      });
+      charRow.querySelectorAll('[data-char]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.char;
+          const c = charDefs.find(x => x.id === id);
+          if (!c) return;
+          if (isCharUnlocked(id)) {
+            save.character = id;
+            persist();
+            renderHome();
+            return;
+          }
+          // try unlock
+          if (!charUnlockReady(c)) {
+            beep(120, 0.06, 'square', 0.02);
+            return;
+          }
+          const cost = c.unlockCost || 0;
+          if (cost > 0 && save.souls < cost) {
+            beep(120, 0.06, 'square', 0.02);
+            return;
+          }
+          if (cost > 0) save.souls -= cost;
+          if (!save.unlocked) save.unlocked = ['intern'];
+          if (!save.unlocked.includes(id)) save.unlocked.push(id);
+          save.character = id;
+          persist();
+          renderHome();
+          beep(660, 0.1, 'square', 0.04);
+        };
+      });
+    }
+
+    ui.upgradeGrid.innerHTML = metaDefs.map(def => {
+      const lv = save.ups[def.id] || 0;
+      const maxed = lv >= def.max;
+      const cost = maxed ? 0 : def.cost(lv);
+      const can = !maxed && save.souls >= cost;
+      return `<div class="up-card ${maxed?'maxed':''}">
+        <div class="top"><h3>${def.name}</h3><div class="lv">Lv.${lv}/${def.max}</div></div>
+        <p>${def.desc}</p>
+        <div class="effect">${def.effect(lv)}${maxed?' · 满':` → ${def.effect(lv+1)}`}</div>
+        <button class="buy" data-up="${def.id}" ${can?'':'disabled'}>${maxed?'已满级':`升级 · ${cost}魂`}</button>
+      </div>`;
+    }).join('');
+    ui.upgradeGrid.querySelectorAll('[data-up]').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.up;
+        const def = metaDefs.find(d => d.id === id);
+        const lv = save.ups[id] || 0;
+        if (lv >= def.max) return;
+        const cost = def.cost(lv);
+        if (save.souls < cost) return;
+        save.souls -= cost;
+        save.ups[id] = lv + 1;
+        persist();
+        renderHome();
+        beep(520 + lv * 40, 0.07, 'square', 0.03);
+      };
+    });
+
+    ui.achList.innerHTML = achDefs.map(a => {
+      const done = a.check() || !!save.ach[a.id];
+      return `<div class="ach ${done?'done':''}"><div><b>${a.name}</b><br/><span>${a.desc}</span></div><div>${done?'✓':'—'}</div></div>`;
+    }).join('');
+  }
+
+  function showScreen(name) {
+    ui.screenHome.classList.toggle('show', name === 'home');
+    ui.screenGame.classList.toggle('show', name === 'game');
+    if (name === 'home') { stopBgm(); state.paused = true; }
+    requestAnimationFrame(() => fit());
+  }
+
+  function openUpgrades() { renderHome(); ui.modalUpgrades.classList.add('show'); }
+  function closeUpgrades() { ui.modalUpgrades.classList.remove('show'); }
+
+  $('btn-play').onclick = () => {
+    closeUpgrades(); ui.modalReset.classList.remove('show');
+    ensureAudio();
+    beginRoomSelect();
+  };
+  $('btn-upgrades').onclick = openUpgrades;
+  $('btn-close-upgrades').onclick = closeUpgrades;
+  ui.modalUpgrades.addEventListener('click', e => { if (e.target === ui.modalUpgrades) closeUpgrades(); });
+  $('btn-home').onclick = () => {
+    if (state.phase === 'playing' || state.phase === 'win') bankRun(state.run.nightsCleared, state.run.kills > 0);
+    state.phase = 'menu'; state.paused = true; stopBgm();
+    showScreen('home'); renderHome();
+  };
+  $('btn-reset-save').onclick = () => ui.modalReset.classList.add('show');
+  $('btn-reset-cancel').onclick = () => ui.modalReset.classList.remove('show');
+  ui.modalReset.addEventListener('click', e => { if (e.target === ui.modalReset) ui.modalReset.classList.remove('show'); });
+  $('btn-reset-confirm').onclick = () => {
+    save = defaultSave(); persist(); ui.modalReset.classList.remove('show'); renderHome();
+    beep(140, 0.12, 'square', 0.03);
+  };
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.onclick = () => {
+      save.difficulty = btn.dataset.diff;
+      persist(); renderHome();
+    };
+  });
+
+  // ---------- Game constants (logical 320x180, canvas buffer 3x) ----------
+  const W = 320, H = 180;
+  const BUF = 3; // backing-store scale for crisp fullscreen
+  const room = { x: 6, y: 12, w: 200, h: 150 };
+  const door = { x: room.x + room.w - 4, y: room.y + 48, w: 8, h: 52 };
+  function syncStageFromGrid() {
+    // room shell wraps the backpack grid; corridor to the right
+    room.x = Math.max(4, GRID.ox - 8);
+    room.y = Math.max(8, GRID.oy - 18);
+    room.w = GRID.w + 20;
+    room.h = GRID.h + 36;
+    door.x = room.x + room.w - 4;
+    door.w = 8;
+    door.h = Math.min(56, Math.max(28, GRID.h * 0.4));
+    door.y = room.y + Math.floor((room.h - door.h) / 2) + 4;
+  }
+  const corridorY = door.y + door.h / 2;
+  const spawnX = W + 20;
+  const doorParkX = door.x + door.w + 14;
+
+  // Backpack grid inside the room
+  const CELL = 16;
+  const GRID = {
+    ox: room.x + 10,
+    oy: room.y + 22,
+    cols: 10,
+    rows: 7,
+  };
+  GRID.w = GRID.cols * CELL;
+  GRID.h = GRID.rows * CELL;
+
+  // Bed is a backpack item occupying cells (left side)
+  const bedItem = { type: 'bed', lv: 1, gx: 0, gy: 2, w: 2, h: 3 };
+  // cell occupancy: null or item ref
+  let cells = [];
+
+  function resetCells() {
+    cells = Array.from({ length: GRID.rows }, () => Array(GRID.cols).fill(null));
+    const room = state.roomDef || roomPool.find(r => r.id === (state.roomId || 'square')) || roomPool[1];
+    const b = (room && room.bed) || { gx: 0, gy: 2 };
+    bedItem.gx = Math.max(0, Math.min(b.gx, GRID.cols - bedItem.w));
+    bedItem.gy = Math.max(0, Math.min(b.gy, GRID.rows - bedItem.h));
+    occupy(bedItem);
+    const rid = state.roomId || 'square';
+    const rdef = roomPool.find(r => r.id === rid) || room;
+    if (rdef && rdef.blocks) {
+      for (const [bx, by] of rdef.blocks) {
+        if (bx < 0 || by < 0 || bx >= GRID.cols || by >= GRID.rows) continue;
+        if (cells[by][bx]) continue;
+        cells[by][bx] = { type: 'block', lv: 0, gx: bx, gy: by, w: 1, h: 1 };
+      }
+    }
+  }
+
+  function occupy(item) {
+    for (let y = item.gy; y < item.gy + item.h; y++)
+      for (let x = item.gx; x < item.gx + item.w; x++)
+        if (cells[y] && x >= 0 && x < GRID.cols) cells[y][x] = item;
+  }
+  function clearItem(item) {
+    for (let y = 0; y < GRID.rows; y++)
+      for (let x = 0; x < GRID.cols; x++)
+        if (cells[y][x] === item) cells[y][x] = null;
+  }
+  function canPlace(gx, gy, w, h, ignore) {
+    if (gx < 0 || gy < 0 || gx + w > GRID.cols || gy + h > GRID.rows) return false;
+    for (let y = gy; y < gy + h; y++)
+      for (let x = gx; x < gx + w; x++) {
+        const c = cells[y][x];
+        if (c && c !== ignore) return false;
+      }
+    return true;
+  }
+  function cellToPixel(gx, gy) {
+    return { x: GRID.ox + gx * CELL, y: GRID.oy + gy * CELL };
+  }
+  function pixelToCell(sx, sy) {
+    return {
+      gx: Math.floor((sx - GRID.ox) / CELL),
+      gy: Math.floor((sy - GRID.oy) / CELL),
+    };
+  }
+  function itemCenter(item) {
+    const p = cellToPixel(item.gx, item.gy);
+    return { x: p.x + item.w * CELL / 2, y: p.y + item.h * CELL / 2 };
+  }
+  function allPlaced() {
+    const list = [];
+    const seen = new Set();
+    for (let y = 0; y < GRID.rows; y++)
+      for (let x = 0; x < GRID.cols; x++) {
+        const c = cells[y][x];
+        if (c && c !== bedItem && c.type !== 'block' && !seen.has(c)) { seen.add(c); list.push(c); }
+      }
+    return list;
+  }
+
+  const towerDefs = {
+    arrow:  { name: '符箭', cost: 40,  range: 130, dmg: 10, cd: 0.5,  color: '#3dff9a', slow: 0,   kind: 'arrow', maxLv: 3, w: 1, h: 1 },
+    frost:  { name: '寒霜', cost: 70,  range: 120, dmg: 6,  cd: 0.65, color: '#6ecbff', slow: 0.5, kind: 'frost', maxLv: 3, w: 1, h: 2 },
+    cannon: { name: '镇魂', cost: 120, range: 145, dmg: 32, cd: 1.1,  color: '#ffb347', slow: 0,   kind: 'cannon', maxLv: 3, w: 2, h: 2 },
+    repair: { name: '维修', cost: 90,  range: 0,   dmg: 0,  cd: 0,    color: '#7dffa0', slow: 0,   kind: 'repair', maxLv: 3, w: 1, h: 1 },
+    idol:   { name: '聚宝', cost: 100, range: 0,   dmg: 0,  cd: 0,    color: '#f0c14b', slow: 0,   kind: 'idol', maxLv: 3, w: 2, h: 1 },
+    spark:  { name: '雷珠', cost: 85,  range: 110, dmg: 8,  cd: 0.7,  color: '#e8ff6a', slow: 0,   kind: 'spark', maxLv: 3, w: 1, h: 1, chain: 1 },
+    poison: { name: '毒香', cost: 75,  range: 100, dmg: 4,  cd: 0.9,  color: '#8b5cf6', slow: 0,   kind: 'poison', maxLv: 3, w: 1, h: 1, poison: 3 },
+    brazier:{ name: '火盆', cost: 110, range: 95,  dmg: 14, cd: 0.95, color: '#ff6b2c', slow: 0,   kind: 'brazier', maxLv: 3, w: 2, h: 1, splash: 22 },
+    eye:    { name: '观煞', cost: 140, range: 200, dmg: 40, cd: 1.4,  color: '#ff4d8d', slow: 0,   kind: 'eye', maxLv: 3, w: 1, h: 2 },
+  };
+  const sizeLabel = t => `${towerDefs[t].w}×${towerDefs[t].h}`;
+
+  const bedIncomeBase = lv => (6 + (lv - 1) * 5 + metaBonus().bedBonus) * metaBonus().bedMul * ((state.roomMul && state.roomMul.bed) || 1);
+  const bedCost = lv => Math.floor(80 * Math.pow(1.55, lv - 1));
+  const doorMax = lv => Math.floor((80 + (lv - 1) * 55 + metaBonus().doorBonus) * metaBonus().doorMul * ((state.roomMul && state.roomMul.door) || 1));
+  const doorCost = lv => Math.floor(60 * Math.pow(1.5, lv - 1));
+  const doorRegen = lv => (0.35 + (lv - 1) * 0.3) * metaBonus().regenMul;
+  const towerUpCost = (type, lv) => Math.floor(towerDefs[type].cost * (0.9 + lv * 0.85));
+  const towerSellValue = (type, lv) => {
+    let spent = towerDefs[type].cost;
+    for (let i = 1; i < lv; i++) spent += towerUpCost(type, i);
+    return Math.floor(spent * 0.6);
+  };
+  function towerStats(type, lv) {
+    const d = towerDefs[type];
+    const mb = metaBonus();
+    if (type === 'repair') return { heal: (2.5 + (lv - 1) * 2.2) * mb.repairMul };
+    if (type === 'idol') return { boost: 0.25 * lv };
+    return {
+      dmg: Math.round(d.dmg * (1 + (lv - 1) * 0.55) * mb.dmgMul),
+      cd: d.cd * (1 - (lv - 1) * 0.08) * mb.cdMul,
+      range: d.range + (lv - 1) * 8,
+      slow: d.slow || 0,
+      chain: d.chain ? d.chain + (lv >= 3 ? 1 : 0) : 0,
+      poison: d.poison ? d.poison + (lv - 1) : 0,
+      splash: d.splash ? d.splash + (lv - 1) * 4 : 0,
+    };
+  }
+
+  const enemyKinds = {
+    minion: { name: '小怪', hpMul: 0.22, dmgMul: 0.35, speedMul: 1.35, color: '#7a9bb8', scale: 1 },
+    elite:  { name: '精英', hpMul: 1.1,  dmgMul: 0.85, speedMul: 0.85, color: '#e8a040', scale: 1.4, shield: 40 },
+    boss:   { name: 'BOSS', hpMul: 2.6,  dmgMul: 1.5,  speedMul: 0.75, color: '#9b7bff', scale: 2.2 },
+  };
+
+  const state = {
+    phase: 'menu',
+    roomId: 'square',
+    roomMul: { door: 1, bed: 1 },
+    feedFlash: 0,
+    doorHealPulse: 0,
+    repairTick: 0,
+    paused: false,
+    speed: 1,
+    gold: 50,
+    bedLv: 1,
+    doorLv: 1,
+    doorHp: 100,
+    wave: 1,
+    nightT: 0,
+    time: 0,
+    ghost: null,
+    enemies: [],
+    spawnQueue: [],
+    spawnT: 0,
+    selectedBuild: null,
+    selectedItem: null,
+    hoverCell: null,
+    bullets: [],
+    beams: [],
+    floaters: [],
+    particles: [],
+    shakes: 0,
+    bedFlash: 0,
+    doorFlash: 0,
+    bedTick: 0,
+    logs: [],
+    flash: 0,
+    run: { nightsCleared: 0, kills: 0, bossKills: 0, banked: false },
+  };
+
+  function log(msg, cls = '') {
+    state.logs.unshift({ msg, cls });
+    state.logs = state.logs.slice(0, 30);
+    ui.log.innerHTML = state.logs.map(l => `<div class="${l.cls}">${l.msg}</div>`).join('');
+  }
+
+  function idolBoost() {
+    let b = 0;
+    for (const it of allPlaced()) if (it.type === 'idol') b += towerStats('idol', it.lv).boost;
+    return b;
+  }
+  function totalIncome() { return bedIncomeBase(state.bedLv) * (1 + idolBoost()); }
+  function bedPixel() {
+    const p = cellToPixel(bedItem.gx, bedItem.gy);
+    return { x: p.x, y: p.y, w: bedItem.w * CELL, h: bedItem.h * CELL };
+  }
+
+  function isBossNight() { return state.wave % 3 === 0; }
+
+  function bankRun(nights, killed) {
+    if (state.run.banked) return 0;
+    state.run.banked = true;
+    const dd = diffDefs[save.difficulty] || diffDefs.normal;
+    let gain = nights * 12 + (killed ? 20 : 0) + (nights >= 1 ? 10 : 0);
+    gain = Math.floor(gain * dd.soulMul);
+    gain = Math.max(5, gain);
+    // daily first clear bonus
+    const tk = todayKey();
+    if (nights >= 1 && save.dailyClaim !== tk) {
+      gain += 25;
+      save.dailyClaim = tk;
+      log(`今日首胜 +25 残魂`, 'soulc');
+    }
+    if (state.run.bossKills > 0) save.ach.bossKill = true;
+    if (nights >= 1 && save.difficulty === 'hard') save.ach.hardClear = true;
+    save.souls += gain;
+    save.ach.soulsEarned = (save.ach.soulsEarned || 0) + gain;
+    save.runs += 1;
+    save.totalNights += nights;
+    if (nights > save.bestNight) save.bestNight = nights;
+    achDefs.forEach(a => { if (a.check()) save.ach[a.id] = true; });
+    persist();
+    return gain;
+  }
+
+
+  // ---------- Room select + AI co-op ----------
+  const roomPool = [
+    { id: 'narrow', name: '狭长宿舍', cols: 8, rows: 6,
+      blocks: [[0,0],[7,0],[0,5],[7,5]],
+      bed: { gx: 0, gy: 2 },
+      doorMul: 0.95, bedMul: 1.15,
+      tag: '窄条房 · 床产钱+15%',
+      feature: '两侧墙角有杂物，中间一条走廊位' },
+    { id: 'square', name: '方正302', cols: 10, rows: 7,
+      blocks: [],
+      bed: { gx: 0, gy: 2 },
+      doorMul: 1.0, bedMul: 1.0,
+      tag: '标准间 · 无遮挡',
+      feature: '最经典布局，格子全开' },
+    { id: 'lshape', name: 'L型套间', cols: 10, rows: 7,
+      blocks: [[8,0],[9,0],[8,1],[9,1],[9,2],[8,6],[9,6],[9,5]],
+      bed: { gx: 0, gy: 2 },
+      doorMul: 1.12, bedMul: 0.95,
+      tag: '右上角被墙堵 · 门更硬',
+      feature: '右上/右下有墙体，靠门可摆位变少' },
+    { id: 'attic', name: '斜顶阁楼', cols: 9, rows: 6,
+      blocks: [[0,0],[1,0],[2,0],[7,0],[8,0],[8,1],[0,5],[8,5]],
+      bed: { gx: 0, gy: 2 },
+      doorMul: 0.88, bedMul: 1.22,
+      tag: '顶边斜切 · 床+22%',
+      feature: '天花板压低，角上放不了建筑' },
+    { id: 'base', name: '地下仓库', cols: 11, rows: 7,
+      blocks: [[5,1],[5,2],[5,4],[5,5],[0,0],[10,0],[0,6],[10,6]],
+      bed: { gx: 0, gy: 2 },
+      doorMul: 1.25, bedMul: 0.9,
+      tag: '大仓库 · 中间有柱子 · 门最硬',
+      feature: '中央承重柱会挡弹道走位，空间最大' },
+    { id: 'twin', name: '双开大间', cols: 12, rows: 6,
+      blocks: [[6,0],[6,1],[6,4],[6,5]],
+      bed: { gx: 0, gy: 2 },
+      doorMul: 1.05, bedMul: 1.05,
+      tag: '中柱隔成左右两区',
+      feature: '左侧睡觉区 / 右侧火力区，中柱切开' },
+  ];
+  const aiNames = ['301·小王', '303·阿强', '305·莉莉'];
+
+  const roomSelect = {
+    open: false,
+    t: 30,
+    rooms: [],
+    owner: {}, // roomId -> {type:'player'|'ai', aiIndex?}
+    aiPickAt: [12, 16, 22],
+    aiPicked: [false, false, false],
+    playerRoom: null,
+    timer: null,
+  };
+  const teammates = []; // runtime co-op
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function drawRoomPreview(cv, room, mode) {
+    // mode: 'select' large detailed | 'mini' small
+    const g = cv.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    const big = mode !== 'mini';
+    const cw = big ? 360 : 160;
+    const ch = big ? 168 : 80;
+    cv.width = cw; cv.height = ch;
+    // backdrop
+    g.fillStyle = '#070a0e';
+    g.fillRect(0, 0, cw, ch);
+    // corridor strip on right
+    g.fillStyle = '#0c1218';
+    g.fillRect(cw - 28, 0, 28, ch);
+
+    const pad = big ? 14 : 6;
+    const cell = Math.floor(Math.min((cw - 28 - pad * 2) / room.cols, (ch - pad * 2 - (big ? 18 : 0)) / room.rows));
+    const ox = pad;
+    const oy = big ? Math.floor((ch - cell * room.rows) / 2) : Math.floor((ch - cell * room.rows) / 2);
+
+    const blockSet = new Set((room.blocks || []).map(b => b[0] + ',' + b[1]));
+    const bed = room.bed || { gx: 0, gy: 2 };
+    const free = [];
+
+    // walls
+    g.fillStyle = '#1a2430';
+    g.fillRect(ox - 4, oy - 4, cell * room.cols + 8, cell * room.rows + 8);
+    g.fillStyle = '#0e1620';
+    g.fillRect(ox - 1, oy - 1, cell * room.cols + 2, cell * room.rows + 2);
+
+    for (let y = 0; y < room.rows; y++) {
+      for (let x = 0; x < room.cols; x++) {
+        const px0 = ox + x * cell, py0 = oy + y * cell;
+        const inBed = x >= bed.gx && x < bed.gx + 2 && y >= bed.gy && y < bed.gy + 3;
+        if (blockSet.has(x + ',' + y)) {
+          g.fillStyle = '#4a3018';
+          g.fillRect(px0, py0, cell - 1, cell - 1);
+          g.fillStyle = '#2a1810';
+          g.fillRect(px0 + 2, py0 + 2, cell - 5, cell - 5);
+        } else if (inBed) {
+          g.fillStyle = '#1a5a38';
+          g.fillRect(px0, py0, cell - 1, cell - 1);
+        } else {
+          g.fillStyle = ((x + y) % 2 === 0) ? '#152028' : '#101820';
+          g.fillRect(px0, py0, cell - 1, cell - 1);
+          g.fillStyle = 'rgba(61,255,154,.06)';
+          g.fillRect(px0, py0, cell - 1, 1);
+          free.push([x, y]);
+        }
+      }
+    }
+
+    // bed sprite
+    const bx = ox + bed.gx * cell, by = oy + bed.gy * cell;
+    g.fillStyle = '#0a1410';
+    g.fillRect(bx, by, cell * 2 - 1, cell * 3 - 1);
+    g.fillStyle = '#2a8a5a';
+    g.fillRect(bx + 2, by + cell + 2, cell * 2 - 5, cell * 3 - cell - 5);
+    g.fillStyle = '#e8f0ea';
+    g.fillRect(bx + 3, by + 3, cell * 2 - 7, cell - 4);
+    if (big) {
+      g.fillStyle = '#3dff9a';
+      g.font = '10px monospace';
+      g.fillText('床2×3', bx, by - 3);
+    }
+
+    // door on right wall
+    const dgx = room.cols - 1;
+    const dgy = Math.max(0, Math.min(room.rows - 2, Math.floor(room.rows / 2) - 1));
+    const dx = ox + dgx * cell + cell - 5;
+    const dy = oy + dgy * cell;
+    g.fillStyle = '#5a2a12';
+    g.fillRect(dx, dy, 6, cell * 2);
+    g.fillStyle = '#c45c26';
+    g.fillRect(dx + 1, dy + 2, 4, cell * 2 - 4);
+    g.fillStyle = '#f0c14b';
+    g.fillRect(dx + 4, dy + cell - 1, 2, 2);
+    // door marker outside
+    g.fillStyle = '#3dff9a';
+    g.fillRect(cw - 22, dy + 4, 14, cell * 2 - 2);
+    g.fillStyle = '#04120b';
+    if (big) {
+      g.font = '9px monospace';
+      g.fillText('门', cw - 18, dy + cell);
+    }
+
+    // free cell markers
+    for (const [x, y] of free) {
+      const px0 = ox + x * cell + cell / 2 - 1;
+      const py0 = oy + y * cell + cell / 2 - 1;
+      g.fillStyle = 'rgba(255,255,255,.2)';
+      g.fillRect(px0, py0, 2, 2);
+    }
+
+    if (big) {
+      // title strip
+      g.fillStyle = 'rgba(0,0,0,.55)';
+      g.fillRect(0, 0, cw, 16);
+      g.fillStyle = '#dce8f0';
+      g.font = '11px monospace';
+      g.fillText(`${room.name}  ${room.cols}×${room.rows}`, 8, 12);
+      // legend
+      g.fillStyle = 'rgba(0,0,0,.45)';
+      g.fillRect(0, ch - 16, cw, 16);
+      g.font = '10px monospace';
+      g.fillStyle = '#2a8a5a';
+      g.fillRect(8, ch - 12, 8, 8);
+      g.fillStyle = '#9ab0c0';
+      g.fillText('床', 20, ch - 5);
+      g.fillStyle = '#4a3018';
+      g.fillRect(40, ch - 12, 8, 8);
+      g.fillStyle = '#9ab0c0';
+      g.fillText('障碍', 52, ch - 5);
+      g.fillStyle = 'rgba(255,255,255,.25)';
+      g.fillRect(88, ch - 9, 4, 4);
+      g.fillStyle = '#9ab0c0';
+      g.fillText(`可放格 ${free.length}`, 98, ch - 5);
+      g.fillStyle = '#3dff9a';
+      g.fillText(`门×${room.doorMul} 床×${room.bedMul}`, cw - 130, ch - 5);
+    }
+  }
+
+  function roomMapHTML(room) {
+    const bed = room.bed || { gx: 0, gy: 2 };
+    const blockSet = new Set((room.blocks || []).map(b => b[0] + ',' + b[1]));
+    const dgx = room.cols - 1;
+    const dgy = Math.max(0, Math.min(room.rows - 2, Math.floor(room.rows / 2) - 1));
+    let free = 0;
+    let html = '';
+    for (let y = 0; y < room.rows; y++) {
+      for (let x = 0; x < room.cols; x++) {
+        let cls = 'cell free';
+        const inBed = x >= bed.gx && x < bed.gx + 2 && y >= bed.gy && y < bed.gy + 3;
+        const inDoor = x === dgx && (y === dgy || y === dgy + 1);
+        if (blockSet.has(x + ',' + y)) cls = 'cell block';
+        else if (inDoor) cls = 'cell door';
+        else if (inBed) cls = 'cell bed';
+        else free++;
+        html += `<div class="${cls}"></div>`;
+      }
+    }
+    return {
+      html,
+      free,
+      style: `grid-template-columns:repeat(${room.cols},1fr);`,
+    };
+  }
+
+  function renderRoomSelectUI() {
+    const grid = document.getElementById('room-grid');
+    const aiRow = document.getElementById('ai-status-row');
+    const timerEl = document.getElementById('room-timer');
+    if (!grid) return;
+    if (timerEl) timerEl.textContent = Math.max(0, Math.ceil(roomSelect.t));
+
+    if (aiRow) {
+      aiRow.innerHTML = aiNames.map((n, i) => {
+        const rid = Object.keys(roomSelect.owner).find(k => roomSelect.owner[k].type === 'ai' && roomSelect.owner[k].aiIndex === i);
+        const room = rid ? roomSelect.rooms.find(r => r.id === rid) : null;
+        return `<div class="ai-chip ${room ? 'done' : ''}"><b>${n}</b><br/><span class="st">${room ? '已选 · ' + room.name : '等待抢房…'}</span></div>`;
+      }).join('');
+    }
+
+    grid.innerHTML = roomSelect.rooms.map(r => {
+      const owner = roomSelect.owner[r.id];
+      const mine = owner && owner.type === 'player';
+      const taken = owner && owner.type === 'ai';
+      const map = roomMapHTML(r);
+      let ownerTxt = '空房 · 点击入住';
+      if (mine) ownerTxt = '★ 你的房间';
+      else if (taken) ownerTxt = aiNames[owner.aiIndex] + ' 入住';
+      return `<button type="button" class="room-card ${mine ? 'mine' : ''} ${taken ? 'taken' : ''}" data-room="${r.id}" ${taken ? 'disabled' : ''}>
+        <h3>${r.name}</h3>
+        <div class="room-map" style="${map.style}">${map.html}</div>
+        <div class="room-legend">
+          <span><i style="background:#2a8a5a"></i>床2×3</span>
+          <span><i style="background:#4a3018"></i>障碍</span>
+          <span><i style="background:#c45c26"></i>门</span>
+          <span><i style="background:#152028"></i>可放 ${map.free} 格</span>
+        </div>
+        <div class="meta" style="margin-top:6px">${r.tag}<br/><span style="color:#8aa0b0">${r.feature || ''}</span><br/>门×${r.doorMul} · 床×${r.bedMul}</div>
+        <div class="owner">${ownerTxt}</div>
+      </button>`;
+    }).join('');
+
+    // bonus pixel canvas under map for extra detail
+    grid.querySelectorAll('[data-room]').forEach(btn => {
+      btn.onclick = () => {
+        const rid = btn.dataset.room;
+        if (roomSelect.owner[rid]) return;
+        for (const k of Object.keys(roomSelect.owner)) {
+          if (roomSelect.owner[k].type === 'player') delete roomSelect.owner[k];
+        }
+        roomSelect.owner[rid] = { type: 'player' };
+        roomSelect.playerRoom = rid;
+        renderRoomSelectUI();
+        const tip = document.getElementById('room-tip');
+        const rm = roomSelect.rooms.find(x => x.id === rid);
+        if (tip) tip.innerHTML = `已选 <b style="color:var(--neon)">${rm.name}</b>（${rm.cols}×${rm.rows}）· ${rm.feature || ''}`;
+        beep(520, 0.06, 'square', 0.03);
+      };
+    });
+  }
+
+  function aiPickRoom(aiIndex) {
+    if (roomSelect.aiPicked[aiIndex]) return;
+    const free = roomSelect.rooms.filter(r => !roomSelect.owner[r.id]);
+    if (!free.length) return;
+    // AI prefers higher door or larger grid sometimes
+    free.sort((a, b) => (b.doorMul * 2 + b.cols * b.rows / 80) - (a.doorMul * 2 + a.cols * a.rows / 80) + (Math.random() - 0.5) * 2);
+    const pick = free[(Math.random() * Math.min(2, free.length)) | 0];
+    roomSelect.owner[pick.id] = { type: 'ai', aiIndex };
+    roomSelect.aiPicked[aiIndex] = true;
+    log(`${aiNames[aiIndex]} 抢下「${pick.name}」`, 'soulc');
+    renderRoomSelectUI();
+  }
+
+  function forceFinishRoomSelect() {
+    if (roomSelect.timer) { clearInterval(roomSelect.timer); roomSelect.timer = null; }
+    roomSelect.open = false;
+    // ensure player has a room
+    if (!roomSelect.playerRoom) {
+      const free = roomSelect.rooms.filter(r => !roomSelect.owner[r.id]);
+      const pick = free[0] || roomSelect.rooms[0];
+      roomSelect.owner[pick.id] = { type: 'player' };
+      roomSelect.playerRoom = pick.id;
+    }
+    // AI take leftovers
+    for (let i = 0; i < 3; i++) {
+      if (roomSelect.aiPicked[i]) continue;
+      const free = roomSelect.rooms.filter(r => !roomSelect.owner[r.id]);
+      if (!free.length) break;
+      const pick = free[(Math.random() * free.length) | 0];
+      roomSelect.owner[pick.id] = { type: 'ai', aiIndex: i };
+      roomSelect.aiPicked[i] = true;
+    }
+    const modal = document.getElementById('modal-rooms');
+    if (modal) {
+      modal.classList.remove('show');
+      modal.style.display = 'none';
+    }
+    resetGame();
+  }
+
+  function beginRoomSelect() {
+    showScreen('game');
+    roomSelect.open = true;
+    roomSelect.t = 30;
+    roomSelect.rooms = shuffle(roomPool).slice(0, 6);
+    roomSelect.owner = {};
+    roomSelect.aiPicked = [false, false, false];
+    roomSelect.playerRoom = null;
+    roomSelect.aiPickAt = [
+      10 + Math.random() * 8,
+      12 + Math.random() * 8,
+      15 + Math.random() * 10,
+    ];
+    const modal = document.getElementById('modal-rooms');
+    if (modal) {
+      modal.classList.add('show');
+      modal.style.display = 'flex';
+    }
+    renderRoomSelectUI();
+    const tip = document.getElementById('room-tip');
+    if (tip) tip.textContent = '下面是各房间真实平面图：绿=床，棕=障碍，橙=门。30秒内点选！';
+    if (roomSelect.timer) clearInterval(roomSelect.timer);
+    const t0 = performance.now();
+    roomSelect.timer = setInterval(() => {
+      if (!roomSelect.open) return;
+      const elapsed = (performance.now() - t0) / 1000;
+      roomSelect.t = 30 - elapsed;
+      for (let i = 0; i < 3; i++) {
+        if (!roomSelect.aiPicked[i] && elapsed >= roomSelect.aiPickAt[i]) aiPickRoom(i);
+      }
+      renderRoomSelectUI();
+      const allPicked = roomSelect.playerRoom && roomSelect.aiPicked.every(Boolean);
+      if (roomSelect.t <= 0 || allPicked) forceFinishRoomSelect();
+    }, 200);
+  }
+
+  const btnLock = document.getElementById('btn-rooms-lock');
+  if (btnLock) btnLock.onclick = () => {
+    if (!roomSelect.playerRoom) {
+      const tip = document.getElementById('room-tip');
+      if (tip) tip.textContent = '请先点选一间空房！';
+      return;
+    }
+    forceFinishRoomSelect();
+  };
+
+  function applySelectedRoomLayout() {
+    const rid = roomSelect.playerRoom || 'square';
+    const room = roomPool.find(r => r.id === rid) || roomPool[1];
+    GRID.cols = room.cols;
+    GRID.rows = room.rows;
+    GRID.w = GRID.cols * CELL;
+    GRID.h = GRID.rows * CELL;
+    // place grid inside stage, leave corridor on right
+    GRID.ox = 18;
+    GRID.oy = 28;
+    if (bedItem) {
+      const b = room.bed || { gx: 0, gy: 2 };
+      bedItem.gx = b.gx;
+      bedItem.gy = Math.min(b.gy, Math.max(0, GRID.rows - bedItem.h));
+      if (bedItem.gx + bedItem.w > GRID.cols) bedItem.gx = 0;
+    }
+    state.roomId = room.id;
+    state.roomMul = { door: room.doorMul, bed: room.bedMul };
+    state.roomDef = room;
+    return room;
+  }
+
+  function buildTeammates() {
+    teammates.length = 0;
+    const picks = roomSelect.owner;
+    for (let i = 0; i < 3; i++) {
+      const rid = Object.keys(picks).find(k => picks[k].type === 'ai' && picks[k].aiIndex === i);
+      const room = roomPool.find(r => r.id === rid) || roomPool[(i + 1) % roomPool.length];
+      const dMax = Math.floor(doorMax(1) * (room.doorMul || 1) * 0.85);
+      teammates.push({
+        name: aiNames[i],
+        roomId: room.id,
+        roomName: room.name,
+        doorHp: dMax,
+        doorMax: dMax,
+        dps: 4 + Math.random() * 3 + i,
+        dead: false,
+        feed: 0,
+      });
+    }
+  }
+
+  function resetGame() {
+    const mb = metaBonus();
+    const dd = diffDefs[save.difficulty] || diffDefs.normal;
+    const room = applySelectedRoomLayout();
+    buildTeammates();
+    state.phase = 'playing';
+    state.paused = false;
+    state.speed = 1;
+    state.gold = mb.startGold;
+    state.bedLv = 1;
+    bedItem.lv = 1;
+    state.doorLv = 1;
+    state.doorHp = doorMax(1);
+    state.wave = 1;
+    state.nightT = 0;
+    state.time = 0;
+    state.ghost = null;
+    state.enemies = []; state.spawnQueue = []; state.spawnT = 0;
+    state.bullets = []; state.beams = []; state.floaters = []; state.particles = [];
+    state.selectedBuild = null; state.selectedItem = null; state.hoverCell = null;
+    state.shakes = 0; state.bedFlash = 0; state.doorFlash = 0; state.flash = 0;
+    state.logs = [];
+    state.run = { nightsCleared: 0, kills: 0, bossKills: 0, banked: false };
+    resetCells();
+
+    // free towers from meta / character
+    let placed = 0;
+    const freeTotal = mb.freeArrows + (mb.freeSpark || 0);
+    for (let y = 0; y < GRID.rows && placed < freeTotal; y++) {
+      for (let x = GRID.cols - 1; x >= 0 && placed < freeTotal; x--) {
+        if (!cells[y][x]) {
+          const type = placed < mb.freeArrows ? 'arrow' : 'spark';
+          const item = { type, lv: 1, gx: x, gy: y, w: 1, h: 1, cd: 0, recoil: 0, charge: 0, aim: 0, flash: 0 };
+          occupy(item);
+          placed++;
+        }
+      }
+    }
+    if (mb.freeSpark) log(`猎人开局送 ${mb.freeSpark} 座雷珠`, 'soulc');
+
+    startWave();
+    ui.overlay.classList.remove('show');
+    document.querySelectorAll('.item[data-tower]').forEach(el => el.classList.remove('selected'));
+    refreshSelectPanel();
+    const chn = charDef().name;
+    ui.diff.textContent = `${dd.label} · ${chn} · 302`;
+    ui.btnPause.textContent = '暂停';
+    ui.btnSpeed.textContent = '1x';
+    log(`第1夜 · ${chn} · 房间「${room.name}」${room.cols}×${room.rows}`, 'bad');
+    log(`AI 队友：${teammates.map(t => t.name + '/' + t.roomName).join('、')}`, 'soulc');
+    if (!save.tutSeen) showTutorial();
+    startBgm();
+  }
+
+  function showTutorial() {
+    // freeze the night while the handbook is open
+    state.paused = true;
+    if (ui.btnPause) ui.btnPause.textContent = '继续';
+    ui.card.innerHTML = `
+      <h1 style="color:var(--neon)">值班手册 · 背包房</h1>
+      <ul class="tutorial-steps">
+        <li><b>1.</b> 房间是格子背包，建筑会占格</li>
+        <li><b>2.</b> 床固定占 <b>2×3</b>；门在墙边不可移动</li>
+        <li><b>3.</b> 点建筑看占地，再点空格子放置（绿=能放）</li>
+        <li><b>4.</b> 撑到 <b>06:00</b>；每 <b>3 夜</b> Boss</li>
+        <li><b>5.</b> 小怪多用范围塔 · 精英有护盾 · 每3夜BOSS<br/>人物在首页选择，效果不同</li>
+      </ul>
+      <div class="btn-row"><button class="btn big-cta" id="btn-tut-ok">知道了，开工</button></div>
+    `;
+    ui.overlay.classList.add('show');
+    $('btn-tut-ok').onclick = () => {
+      save.tutSeen = true; persist();
+      ui.overlay.classList.remove('show');
+      if (state.phase === 'playing') {
+        state.paused = false;
+        if (ui.btnPause) ui.btnPause.textContent = '暂停';
+      }
+    };
+  }
+
+  function spawnEnemy(kind, wave, dd) {
+    const kd = enemyKinds[kind];
+    const firstMul = wave === 1 ? 0.85 : 1;
+    const baseHp = Math.floor(90 * Math.pow(1.28, wave - 1) * dd.hpMul * firstMul);
+    const hp = Math.max(8, Math.floor(baseHp * kd.hpMul));
+    return {
+      kind,
+      x: spawnX + Math.random() * 24,
+      y: corridorY + (Math.random() - 0.5) * 10,
+      hp, maxHp: hp,
+      baseDmg: (7 + (wave - 1) * 1.8) * dd.dmgMul * firstMul * kd.dmgMul,
+      dmg: 0,
+      speed: (48 + (wave - 1) * 2) * dd.speedMul * firstMul * kd.speedMul,
+      attackCd: 0,
+      slowT: 0, slowMul: 1,
+      poisonT: 0, poisonDps: 0,
+      shield: (kd.shield || 0) + (wave > 2 ? (kd.shield || 0) * 0.15 * (wave - 2) : 0),
+      dead: false,
+      phase: 'walk',
+      bob: Math.random() * 10,
+      rage: 0,
+      hurt: 0, lunge: 0, clawT: 0,
+      scale: kd.scale,
+      color: kd.color,
+      label: kd.name,
+    };
+  }
+
+  function buildSpawnQueue(wave, dd) {
+    const q = [];
+    const boss = wave % 3 === 0;
+    const sm = dd.spawnMul || 1;
+    const em = dd.eliteMul || 1;
+    const minionCount = Math.max(3, Math.floor((4 + wave * 1.6) * sm));
+    const eliteCount = Math.floor(((wave - 1) / 2 + (wave >= 4 ? 1 : 0)) * em);
+    for (let i = 0; i < minionCount; i++) {
+      q.push({ kind: 'minion', at: 0.5 + i * Math.max(0.9, (2.2 - Math.min(0.8, wave * 0.08)) / Math.max(0.8, sm)) });
+    }
+    for (let i = 0; i < eliteCount; i++) {
+      q.push({ kind: 'elite', at: 6 + i * 4.5 + wave * 0.3 });
+    }
+    if (boss) {
+      q.push({ kind: 'boss', at: 10 + wave * 0.4 });
+    }
+    q.sort((a, b) => a.at - b.at);
+    return q;
+  }
+
+  function startWave() {
+    const dd = diffDefs[save.difficulty] || diffDefs.normal;
+    const w = state.wave;
+    state.enemies = [];
+    state.spawnQueue = buildSpawnQueue(w, dd);
+    state.spawnT = 0;
+    state.ghost = null; // legacy field unused
+    if (w % 3 === 0) log(`第${w}夜 · BOSS 波！`, 'bad');
+    else log(`第${w}夜 · 怪潮来袭（小怪/精英）`, 'bad');
+  }
+
+  function livingEnemies() {
+    return state.enemies.filter(e => !e.dead);
+  }
+
+  function pickTarget(fromX, fromY, range) {
+    let best = null, bestKey = Infinity;
+    for (const e of livingEnemies()) {
+      const dist = Math.hypot(e.x - fromX, e.y - fromY);
+      if (dist > range) continue;
+      // prefer closest to door (smallest x), then nearest
+      const key = e.x * 0.01 + dist;
+      if (key < bestKey) { bestKey = key; best = e; }
+    }
+    return best;
+  }
+
+  function damageEnemy(e, dmg, color) {
+    if (!e || e.dead) return;
+    let left = dmg;
+    if (e.shield > 0) {
+      const absorbed = Math.min(e.shield, left);
+      e.shield -= absorbed;
+      left -= absorbed;
+      addFloater(e.x, e.y - 10, `盾-${absorbed}`, '#c8d8e8');
+    }
+    if (left > 0) {
+      e.hp -= left;
+      e.hurt = 0.12;
+      addFloater(e.x + (Math.random()-0.5)*4, e.y - 8, `-${Math.round(left)}`, color || '#fff', e.kind === 'boss');
+    }
+    if (e.hp <= 0) {
+      e.hp = 0;
+      e.dead = true;
+      const gold = e.kind === 'boss' ? 40 + state.wave * 8 : e.kind === 'elite' ? 12 : 4;
+      state.gold += gold;
+      burst(e.x, e.y, e.color, e.kind === 'boss' ? 18 : 8, { speed: e.kind === 'boss' ? 40 : 22 });
+      addFloater(e.x, e.y - 12, `+${gold}`, '#f0c14b');
+      if (e.kind === 'boss') {
+        state.run.bossKills = (state.run.bossKills || 0) + 1;
+        log('BOSS 击破！', 'good');
+        beep(200, 0.15, 'square', 0.04);
+      } else if (e.kind === 'elite') {
+        log('精英消灭 +金', 'good');
+      }
+      state.run.kills = (state.run.kills || 0) + 1;
+    }
+  }
+
+  function clockLabel() {
+    const dd = diffDefs[save.difficulty] || diffDefs.normal;
+    const t = Math.min(1, state.nightT / dd.night);
+    const mins = (22 * 60 + t * 8 * 60) % (24 * 60);
+    return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(Math.floor(mins%60)).padStart(2,'0')}`;
+  }
+
+  function addParticle(x, y, opt = {}) {
+    if (reduceMotion && state.particles.length > 40) return;
+    state.particles.push({
+      x, y,
+      vx: opt.vx ?? (Math.random()-0.5)*20,
+      vy: opt.vy ?? (Math.random()-0.5)*20,
+      life: opt.life ?? 0.4, max: opt.life ?? 0.4,
+      size: opt.size ?? 1, color: opt.color ?? '#fff', kind: opt.kind ?? 'px',
+    });
+  }
+  function burst(x, y, color, n = 8, opt = {}) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random()*Math.PI*2;
+      const sp = (opt.speed ?? 30) * (0.4 + Math.random()*0.8);
+      addParticle(x, y, {
+        vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
+        life: (opt.life ?? 0.35)*(0.6+Math.random()*0.7),
+        size: opt.size ?? 1, color, kind: opt.kind ?? 'px',
+      });
+    }
+  }
+  function addFloater(x, y, text, color, big = false) {
+    state.floaters.push({ x, y, text, color, t: 0.85, big });
+  }
+
+  function winNight(reason = 'dawn') {
+    if (state.phase !== 'playing') return;
+    state.phase = 'win';
+    state.paused = true;
+    stopBgm();
+    state.run.nightsCleared += 1;
+    if (reason === 'kill') state.run.kills += 1;
+    if (state.run && state.run.bossKills > 0 && reason === 'kill') { /* counted in damageEnemy */ }
+    const aliveAI = teammates.filter(t => !t.dead).length;
+    const bonus = 50 + state.wave * 20 + aliveAI * 15 + (reason === 'kill' ? (isBossNight() ? 150 : 80) : 0);
+    state.gold += bonus;
+    for (const e of livingEnemies()) burst(e.x, e.y, e.color, 8, { speed: 24 });
+    state.flash = 0.25;
+    const title = reason === 'kill' ? (isBossNight() ? 'BOSS 击破' : '猛鬼伏诛') : '天亮了';
+    const pending = Math.max(5, Math.floor(state.run.nightsCleared * 12 + (reason === 'kill' ? 20 : 0) + 10));
+    ui.card.innerHTML = `
+      <h1 class="win">${title}</h1>
+      <p>第 ${state.wave} 夜过关 · 奖金 <b style="color:var(--gold)">${bonus}</b> 金<br/>AI 存活 ${teammates.filter(t=>!t.dead).length}/3 · 回首页可结算残魂</p>
+      <div class="gain">本局累计残魂 ≈ ${pending}</div>
+      <div class="btn-row">
+        <button class="btn" id="btn-next">继续下一夜</button>
+        <button class="btn ghost" id="btn-home-win">回首页结算</button>
+      </div>
+    `;
+    ui.overlay.classList.add('show');
+    $('btn-next').onclick = () => {
+      state.wave += 1; state.phase = 'playing'; state.paused = false;
+      state.nightT = 0; state.bullets = []; state.particles = [];
+      state.doorHp = Math.min(doorMax(state.doorLv), state.doorHp + doorMax(state.doorLv) * 0.4);
+      startWave(); ui.overlay.classList.remove('show');
+      log(`第${state.wave}夜开始${isBossNight()?' · BOSS夜':''}`, 'bad');
+      startBgm();
+    };
+    $('btn-home-win').onclick = () => {
+      const souls = bankRun(state.run.nightsCleared, state.run.kills > 0);
+      log(`结算残魂 +${souls}`, 'soulc');
+      showScreen('home'); renderHome();
+    };
+    log(reason === 'kill' ? `击杀成功 +${bonus}金` : `天亮 +${bonus}金`, 'good');
+    beep(660, 0.1, 'square', 0.04);
+    setTimeout(() => beep(880, 0.12, 'square', 0.035), 100);
+  }
+
+  function loseGame() {
+    if (state.phase === 'lose') return;
+    state.phase = 'lose';
+    state.paused = true;
+    stopBgm();
+    state.flash = 0.5; state.shakes = 1.2;
+    burst(door.x + door.w, door.y + door.h/2, '#ff4d5e', 20, { speed: 50 });
+    const cleared = state.run.nightsCleared;
+    const souls = bankRun(cleared, false);
+    ui.card.innerHTML = `
+      <h1 class="lose">门破了</h1>
+      <p>302 失守 · 第 ${state.wave} 夜 ${clockLabel()}<br/>本局已过 ${cleared} 夜</p>
+      <div class="gain">残魂 +${souls} · 累计 ${save.souls}</div>
+      <div class="btn-row">
+        <button class="btn" id="btn-retry">再来一局</button>
+        <button class="btn ghost" id="btn-home-lose">回首页强化</button>
+      </div>
+    `;
+    ui.overlay.classList.add('show');
+    $('btn-retry').onclick = resetGame;
+    $('btn-home-lose').onclick = () => { showScreen('home'); renderHome(); };
+    log('门被挠穿了。', 'bad');
+    beep(80, 0.3, 'sawtooth', 0.05);
+  }
+
+  function tryPlaceAt(gx, gy) {
+    if (!state.selectedBuild) return;
+    const def = towerDefs[state.selectedBuild];
+    if (!canPlace(gx, gy, def.w, def.h)) {
+      log('格子放不下 / 已被占用', 'bad');
+      beep(120, 0.05, 'square', 0.02);
+      return;
+    }
+    if (state.gold < def.cost) {
+      log('金币不够', 'bad');
+      beep(120, 0.05, 'square', 0.02);
+      return;
+    }
+    state.gold -= def.cost;
+    const item = {
+      type: state.selectedBuild, lv: 1,
+      gx, gy, w: def.w, h: def.h,
+      cd: 0, recoil: 0, charge: 0, aim: 0, flash: 0.3,
+    };
+    occupy(item);
+    state.selectedItem = item;
+    state.hoverCell = null;
+    const c = itemCenter(item);
+    burst(c.x, c.y, def.color, 12, { speed: 28 });
+    addFloater(c.x, c.y - 6, `-${def.cost}`, '#f0c14b', true);
+    log(`${def.name} ${def.w}×${def.h} 入包 -${def.cost}金`, 'goldc');
+    beep(520, 0.05, 'square', 0.03);
+    refreshSelectPanel();
+  }
+
+  function clickGrid(sx, sy) {
+    const { gx, gy } = pixelToCell(sx, sy);
+    if (gx < 0 || gy < 0 || gx >= GRID.cols || gy >= GRID.rows) {
+      state.selectedItem = null;
+      refreshSelectPanel();
+      return;
+    }
+    const cell = cells[gy][gx];
+    if (state.selectedBuild) {
+      tryPlaceAt(gx, gy);
+      return;
+    }
+    if (cell && cell !== bedItem) {
+      state.selectedItem = cell;
+      refreshSelectPanel();
+    } else if (cell === bedItem) {
+      log('床已固定占位，可在左侧升级');
+      state.selectedItem = null;
+      refreshSelectPanel();
+    } else {
+      state.selectedItem = null;
+      refreshSelectPanel();
+    }
+  }
+
+  function refreshSelectPanel() {
+    const item = state.selectedItem;
+    if (!item || item === bedItem || !towerDefs[item.type]) {
+      ui.selPanel.style.display = 'none';
+      return;
+    }
+    const t = item;
+    const def = towerDefs[t.type];
+    const st = towerStats(t.type, t.lv);
+    const maxed = t.lv >= def.maxLv;
+    const upCost = maxed ? 0 : towerUpCost(t.type, t.lv);
+    ui.selPanel.style.display = 'block';
+    ui.selTitle.textContent = `${def.name} ${def.w}×${def.h} Lv.${t.lv}${maxed?' MAX':''}`;
+    if (t.type === 'repair') ui.selDesc.textContent = `全局修门 +${st.heal.toFixed(1)}/s（无需靠近门）· ${def.w}×${def.h}格`;
+    else if (t.type === 'idol') ui.selDesc.textContent = `收入 +${Math.round(st.boost*100)}% · ${def.w}×${def.h}格`;
+    else {
+      let extra = '';
+      if (st.chain) extra = ` 链×${st.chain}`;
+      if (st.poison) extra = ` 毒${st.poison}/s`;
+      if (st.splash) extra = ` 溅射${st.splash}`;
+      if (st.slow) extra = ` 减速${Math.round(st.slow*100)}%`;
+      ui.selDesc.textContent = `伤${st.dmg} 射程${Math.round(st.range)}${extra} · ${def.w}×${def.h}格`;
+    }
+    ui.btnUpTower.textContent = maxed ? '已满级' : `升级 ${upCost}`;
+    ui.btnUpTower.disabled = maxed || state.gold < upCost;
+    ui.btnSellTower.textContent = `出售 +${towerSellValue(t.type, t.lv)}`;
+  }
+
+  ui.btnUpTower.onclick = () => {
+    const item = state.selectedItem; if (!item || !towerDefs[item.type]) return;
+    const def = towerDefs[item.type];
+    if (item.lv >= def.maxLv) return;
+    const c = towerUpCost(item.type, item.lv);
+    if (state.gold < c) { log('升级金币不够', 'bad'); return; }
+    state.gold -= c; item.lv += 1; item.flash = 0.35;
+    const p = itemCenter(item);
+    burst(p.x, p.y, def.color, 12, { speed: 30 });
+    addFloater(p.x, p.y - 6, `Lv.${item.lv}`, def.color, true);
+    log(`${def.name} → Lv.${item.lv}`, 'good');
+    beep(600 + item.lv * 70, 0.06, 'square', 0.03);
+    refreshSelectPanel();
+  };
+  ui.btnSellTower.onclick = () => {
+    const item = state.selectedItem; if (!item || !towerDefs[item.type]) return;
+    const def = towerDefs[item.type];
+    const v = towerSellValue(item.type, item.lv);
+    state.gold += v;
+    const p = itemCenter(item);
+    burst(p.x, p.y, '#f0c14b', 8, { speed: 24 });
+    log(`出售${def.name} +${v}金（格子腾出）`, 'goldc');
+    clearItem(item);
+    state.selectedItem = null;
+    beep(300, 0.06, 'square', 0.025);
+    refreshSelectPanel();
+  };
+
+  function canvasPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      sx: (e.clientX - rect.left) * (W / rect.width),
+      sy: (e.clientY - rect.top) * (H / rect.height),
+    };
+  }
+
+  canvas.addEventListener('mousemove', e => {
+    if (state.phase !== 'playing') { state.hoverCell = null; return; }
+    const { sx, sy } = canvasPos(e);
+    const { gx, gy } = pixelToCell(sx, sy);
+    state.hoverCell = (gx >= 0 && gy >= 0 && gx < GRID.cols && gy < GRID.rows) ? { gx, gy } : null;
+  });
+  canvas.addEventListener('mouseleave', () => { state.hoverCell = null; });
+
+  canvas.addEventListener('click', e => {
+    if (state.phase !== 'playing' || state.paused) return;
+    const { sx, sy } = canvasPos(e);
+    clickGrid(sx, sy);
+  });
+
+  $('btn-up-bed').onclick = () => {
+    if (state.phase !== 'playing') return;
+    const c = bedCost(state.bedLv);
+    if (state.gold < c) { log('升床金币不够', 'bad'); return; }
+    state.gold -= c; state.bedLv += 1; bedItem.lv = state.bedLv; state.bedFlash = 0.4;
+    const bp = bedPixel();
+    burst(bp.x + bp.w/2, bp.y + bp.h/2, '#3dff9a', 10, { speed: 22 });
+    log(`床 Lv.${state.bedLv} 收入${bedIncomeBase(state.bedLv)}/s（仍占2×3格）`, 'goldc');
+  };
+  $('btn-up-door').onclick = () => {
+    if (state.phase !== 'playing') return;
+    const c = doorCost(state.doorLv);
+    if (state.gold < c) { log('加固金币不够', 'bad'); return; }
+    state.gold -= c; state.doorLv += 1;
+    state.doorHp = Math.min(doorMax(state.doorLv), state.doorHp + 40);
+    state.doorFlash = 0.4;
+    log(`门 Lv.${state.doorLv} 上限${doorMax(state.doorLv)}`, 'good');
+  };
+
+  document.querySelectorAll('.item[data-tower]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (state.phase !== 'playing') return;
+      const t = btn.dataset.tower;
+      state.selectedBuild = state.selectedBuild === t ? null : t;
+      if (state.selectedBuild) state.selectedItem = null;
+      state.hoverCell = null;
+      document.querySelectorAll('.item[data-tower]').forEach(el => {
+        el.classList.toggle('selected', el.dataset.tower === state.selectedBuild);
+      });
+      if (state.selectedBuild) log(`已选${towerDefs[t].name} ${towerDefs[t].w}×${towerDefs[t].h}，点空格放置`);
+      refreshSelectPanel();
+    });
+  });
+
+  ui.btnPause.onclick = () => {
+    if (state.phase !== 'playing') return;
+    state.paused = !state.paused;
+    ui.btnPause.textContent = state.paused ? '继续' : '暂停';
+    if (state.paused) log('已暂停'); else startBgm();
+  };
+  ui.btnSpeed.onclick = () => {
+    state.speed = state.speed === 1 ? 2 : 1;
+    ui.btnSpeed.textContent = `${state.speed}x`;
+  };
+
+  window.addEventListener('keydown', e => {
+    if (!ui.screenGame.classList.contains('show')) return;
+    const map = { '1':'arrow','2':'frost','3':'cannon','4':'repair','5':'idol','6':'spark','7':'poison','8':'brazier','9':'eye' };
+    if (map[e.key]) {
+      const btn = document.querySelector(`.item[data-tower="${map[e.key]}"]`);
+      if (btn) btn.click();
+    }
+    if (e.key === 'p' || e.key === 'P') ui.btnPause.click();
+    if (e.key === 'f' || e.key === 'F') ui.btnSpeed.click();
+    if (e.key === 'Escape') {
+      state.selectedBuild = null; state.selectedItem = null;
+      document.querySelectorAll('.item[data-tower]').forEach(el => el.classList.remove('selected'));
+      refreshSelectPanel();
+    }
+  });
+
+  function update(dt) {
+    state.time += dt;
+    state.bedFlash = Math.max(0, state.bedFlash - dt);
+    state.doorFlash = Math.max(0, state.doorFlash - dt);
+    state.flash = Math.max(0, state.flash - dt);
+    state.shakes = Math.max(0, state.shakes - dt * 4);
+    if (typeof state.feedFlash === 'number') state.feedFlash = Math.max(0, state.feedFlash - dt);
+
+    // any modal/overlay freezes combat clock
+    const overlayOpen = ui.overlay && ui.overlay.classList.contains('show');
+    if (state.phase !== 'playing' || state.paused || overlayOpen) {
+      updateParticles(dt * 0.3);
+      return;
+    }
+    for (const it of allPlaced()) it.flash = Math.max(0, (it.flash || 0) - dt);
+
+    if (state.phase !== 'playing' || state.paused) {
+      updateParticles(dt * 0.3);
+      return;
+    }
+
+    const dd = diffDefs[save.difficulty] || diffDefs.normal;
+    state.nightT += dt;
+    if (state.nightT >= dd.night) { winNight('dawn'); return; }
+
+    state.gold += totalIncome() * dt;
+    state.bedTick += dt;
+    if (state.bedTick >= 1) {
+      state.bedTick = 0;
+      const bp = bedPixel();
+      addParticle(bp.x + 8 + Math.random()*12, bp.y + 4, {
+        vx: (Math.random()-0.5)*4, vy: -12 - Math.random()*8,
+        life: 0.6, size: 1, color: '#f0c14b', kind: 'coin',
+      });
+    }
+
+    for (const s of allPlaced()) {
+      if (s.type !== 'repair') continue;
+      const st = towerStats('repair', s.lv);
+      const c = itemCenter(s);
+      // any repair bot heals the door — no range limit
+      if (state.doorHp < doorMax(state.doorLv)) {
+        const heal = st.heal * dt;
+        const before = state.doorHp;
+        state.doorHp = Math.min(doorMax(state.doorLv), state.doorHp + heal);
+        const gained = state.doorHp - before;
+        if (gained > 0) {
+          state.doorHealPulse = Math.min(1, (state.doorHealPulse || 0) + gained * 0.15 + 0.08);
+          state.repairTick = (state.repairTick || 0) + gained;
+          // stream particles repair → door
+          const doorMidY = door.y + door.h / 2;
+          if (Math.random() < dt * 18) {
+            addParticle(c.x, c.y, {
+              vx: (door.x - c.x) * 1.8,
+              vy: (doorMidY - c.y) * 1.8,
+              life: 0.35,
+              size: 1,
+              color: '#7dffa0',
+            });
+          }
+          // sparkles on door surface
+          if (Math.random() < dt * 10) {
+            addParticle(door.x + 2, door.y + 6 + Math.random() * (door.h - 12), {
+              vx: -4 + Math.random() * 8,
+              vy: -8 - Math.random() * 10,
+              life: 0.45,
+              size: 1,
+              color: Math.random() > 0.5 ? '#7dffa0' : '#d0ffe0',
+            });
+          }
+          // floating +HP every ~12 hp restored
+          if (state.repairTick >= 12) {
+            state.repairTick = 0;
+            addFloater(door.x - 4, door.y + 10 + Math.random() * 20, '+门', '#7dffa0');
+          }
+        }
+      } else if (Math.random() < dt * 2) {
+        // idle pulse when door is full — bot still "online"
+        state.doorHealPulse = Math.min(0.4, (state.doorHealPulse || 0) + 0.05);
+        addParticle(c.x, c.y - 4, { vx: 0, vy: -10, life: 0.4, size: 1, color: '#7dffa0' });
+      }
+    }
+    state.doorHealPulse = Math.max(0, (state.doorHealPulse || 0) - dt * 2.2);
+    state.doorHp = Math.min(doorMax(state.doorLv), state.doorHp + doorRegen(state.doorLv) * dt * 0.35);
+
+    // AI teammates auto-defend
+    for (const tm of teammates) {
+      if (tm.dead) continue;
+      tm.dps = tm.dps; // stable
+      // passive income helps them hold a bit
+      tm.doorHp = Math.min(tm.doorMax, tm.doorHp + dt * 0.25);
+      if (Math.random() < dt * 0.15) {
+        // AI chip damage on nearest enemy
+        const live = livingEnemies();
+        if (live.length) {
+          let tgt = live[0];
+          for (const e of live) if (e.x < tgt.x) tgt = e;
+          // small shared DPS
+          damageEnemy(tgt, tm.dps * dt * 2.2, '#c4a0ff');
+        }
+      }
+    }
+
+    // spawn schedule
+    state.spawnT += dt;
+    while (state.spawnQueue.length && state.spawnQueue[0].at <= state.spawnT) {
+      const job = state.spawnQueue.shift();
+      const e = spawnEnemy(job.kind, state.wave, dd);
+      state.enemies.push(e);
+      if (job.kind === 'boss') log('BOSS 出现！', 'bad');
+      if (job.kind === 'elite') log('精英出现', 'bad');
+    }
+
+    const nightRage = (state.nightT / dd.night) * 0.4;
+    for (const e of state.enemies) {
+      if (e.dead) continue;
+      e.rage = nightRage;
+      e.dmg = e.baseDmg * (1 + e.rage * 0.4);
+      e.bob += dt * 6;
+      e.hurt = Math.max(0, e.hurt - dt);
+      e.lunge = Math.max(0, e.lunge - dt);
+      e.clawT = Math.max(0, e.clawT - dt);
+      if (e.poisonT > 0) {
+        e.poisonT -= dt;
+        damageEnemy(e, e.poisonDps * dt, '#8b5cf6');
+      }
+      if (e.dead) continue;
+      if (e.slowT > 0) { e.slowT -= dt; e.slowMul = 0.55; } else e.slowMul = 1;
+
+      if (e.phase === 'walk') {
+        e.y += (corridorY - e.y) * Math.min(1, dt * 3);
+        const dx = doorParkX - e.x;
+        if (Math.abs(dx) < 2) { e.phase = 'attack'; e.attackCd = 0; }
+        else {
+          const step = Math.min(Math.abs(dx), e.speed * e.slowMul * (1 + e.rage * 0.3) * dt);
+          e.x += Math.sign(dx) * step;
+        }
+      } else if (e.phase === 'attack') {
+        e.attackCd -= dt;
+        if (e.attackCd <= 0) {
+          e.attackCd = e.kind === 'boss' ? 0.55 : e.kind === 'elite' ? 0.65 : 0.8;
+          e.lunge = 0.2; e.clawT = 0.28;
+          // choose target: player vs alive AI (weighted)
+          const aliveAI = teammates.filter(t => !t.dead);
+          const targetAI = aliveAI.length && Math.random() < 0.45
+            ? aliveAI[(Math.random() * aliveAI.length) | 0]
+            : null;
+          if (targetAI) {
+            targetAI.doorHp -= e.dmg;
+            addFloater(door.x + 40, door.y + 10 + Math.random()*20, `-${Math.round(e.dmg)} ${targetAI.name}`, '#c4a0ff');
+            if (targetAI.doorHp <= 0) {
+              targetAI.doorHp = 0;
+              targetAI.dead = true;
+              e.feed = (e.feed || 0) + 1;
+              e.maxHp = Math.floor(e.maxHp * 1.08);
+              e.hp = e.maxHp;
+              e.baseDmg *= 1.08;
+              state.feedFlash = 0.5;
+              log(`${targetAI.name} 的门破了！猛鬼吞噬变强`, 'bad');
+            }
+          } else {
+            state.doorHp -= e.dmg;
+            state.doorFlash = 0.25;
+            state.shakes = e.kind === 'boss' ? 1.2 : e.kind === 'elite' ? 0.9 : 0.55;
+            addFloater(door.x - 6, door.y + 10 + Math.random()*30, `-${Math.round(e.dmg)}`, '#ff4d5e', e.kind === 'boss');
+            if (state.doorHp <= 0) { state.doorHp = 0; loseGame(); return; }
+          }
+        }
+      }
+    }
+    state.enemies = state.enemies.filter(e => !e.dead);
+    if (!state.spawnQueue.length && !livingEnemies().length && state.nightT > 3) {
+      winNight('kill');
+      return;
+    }
+
+    for (const s of allPlaced()) {
+      const type = s.type;
+      if (type === 'repair' || type === 'idol') continue;
+      const st = towerStats(type, s.lv);
+      s.cd -= dt;
+      s.recoil = Math.max(0, (s.recoil || 0) - dt);
+      s.charge = Math.max(0, (s.charge || 0) - dt);
+      const c = itemCenter(s);
+      const target = pickTarget(c.x, c.y, st.range);
+      if (!target) continue;
+      s.aim = Math.atan2(target.y - c.y, target.x - c.x);
+      if (s.cd > 0) continue;
+      s.cd = st.cd;
+      s.recoil = 0.22;
+      s.charge = 0.18;
+      s.flash = 0.28;
+      s.muzzle = 1;
+      const mx = c.x + Math.cos(s.aim) * 8;
+      const my = c.y + Math.sin(s.aim) * 8;
+      const def = towerDefs[type];
+      // muzzle flash light + particles
+      lightHalo(mx, my, 10 + (s.lv || 1), def.color, 0.55);
+      burst(mx, my, def.color, type === 'cannon' || type === 'brazier' ? 6 : 4, {
+        speed: 22, life: 0.18, size: 1,
+      });
+      // tracer beam tower → target
+      state.beams.push({
+        x1: mx, y1: my, x2: target.x, y2: target.y,
+        color: def.color, life: 0.16, max: 0.16,
+        kind: type === 'spark' ? 'zig' : type === 'eye' ? 'beam' : 'line',
+      });
+      if (type === 'spark') {
+        let last = target;
+        const hitList = [target];
+        damageEnemy(target, st.dmg, def.color);
+        burst(target.x, target.y, def.color, 6, { speed: 24, life: 0.25 });
+        lightHalo(target.x, target.y, 12, def.color, 0.5);
+        addFloater(target.x, target.y - 8, `-${st.dmg}`, def.color);
+        for (let k = 0; k < st.chain; k++) {
+          let next = null, nd = 42;
+          for (const e of livingEnemies()) {
+            if (hitList.includes(e)) continue;
+            const d = Math.hypot(e.x - last.x, e.y - last.y);
+            if (d < nd) { nd = d; next = e; }
+          }
+          if (!next) break;
+          hitList.push(next);
+          state.beams.push({
+            x1: last.x, y1: last.y, x2: next.x, y2: next.y,
+            color: def.color, life: 0.22, max: 0.22, kind: 'zig',
+          });
+          damageEnemy(next, Math.floor(st.dmg * 0.65), def.color);
+          burst(next.x, next.y, def.color, 4, { speed: 18, life: 0.2 });
+          lightHalo(next.x, next.y, 9, def.color, 0.4);
+          last = next;
+        }
+      } else {
+        state.bullets.push({
+          x: mx, y: my, px: mx, py: my,
+          dmg: st.dmg, slow: st.slow, color: def.color,
+          speed: (type === 'cannon' || type === 'brazier') ? 120 : type === 'eye' ? 220 : 160,
+          life: 1.3, kind: type, splash: st.splash, poison: st.poison,
+        });
+      }
+    }
+
+    for (const b of state.bullets) {
+      const live = livingEnemies();
+      if (!live.length) { b.life = 0; continue; }
+      let tgt = live[0], td = Infinity;
+      for (const e of live) {
+        const d = Math.hypot(e.x - b.x, e.y - b.y);
+        if (d < td) { td = d; tgt = e; }
+      }
+      b.px = b.x; b.py = b.y;
+      const dx = tgt.x - b.x, dy = tgt.y - b.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const step = b.speed * dt;
+      if (d <= step + 3) {
+        b.life = 0;
+        damageEnemy(tgt, b.dmg, b.color);
+        if (b.slow) { tgt.slowT = Math.max(tgt.slowT, 1.2); tgt.slowMul = 0.55; }
+        if (b.poison) { tgt.poisonT = 3; tgt.poisonDps = b.poison; }
+        // hit flash ring
+        burst(tgt.x, tgt.y, b.color, b.kind === 'cannon' || b.kind === 'brazier' ? 10 : 5, {
+          speed: b.kind === 'eye' ? 32 : 20, life: 0.28,
+        });
+        lightHalo(tgt.x, tgt.y, b.splash ? 18 : 9, b.color, 0.55);
+        state.beams.push({
+          x1: tgt.x - 5, y1: tgt.y, x2: tgt.x + 5, y2: tgt.y,
+          color: '#ffffff', life: 0.08, max: 0.08, kind: 'hit',
+        });
+        if (b.splash) {
+          for (const e of livingEnemies()) {
+            if (e === tgt) continue;
+            if (Math.hypot(e.x - tgt.x, e.y - tgt.y) <= b.splash) {
+              damageEnemy(e, Math.floor(b.dmg * 0.45), b.color);
+              burst(e.x, e.y, b.color, 4, { speed: 16, life: 0.2 });
+            }
+          }
+          // splash ring
+          state.beams.push({
+            x1: tgt.x, y1: tgt.y, x2: tgt.x + b.splash, y2: tgt.y,
+            color: b.color, life: 0.2, max: 0.2, kind: 'ring',
+          });
+        }
+      } else {
+        b.x += (dx/d)*step; b.y += (dy/d)*step; b.life -= dt;
+        // trail sparks
+        if (Math.random() < dt * 40) {
+          addParticle(b.x, b.y, { vx: 0, vy: 0, life: 0.15, size: 1, color: b.color });
+        }
+      }
+    }
+    state.bullets = state.bullets.filter(b => b.life > 0);
+    for (const bm of state.beams) bm.life -= dt;
+    state.beams = state.beams.filter(bm => bm.life > 0);
+
+    // hard cap effect lists
+    if (state.particles.length > 120) state.particles.splice(0, state.particles.length - 120);
+    if (state.beams.length > 40) state.beams.splice(0, state.beams.length - 40);
+    if (state.floaters.length > 40) state.floaters.splice(0, state.floaters.length - 40);
+
+    updateParticles(dt);
+    for (const f of state.floaters) { f.t -= dt; f.y -= 12 * dt; }
+    state.floaters = state.floaters.filter(f => f.t > 0);
+    updateUI();
+  }
+
+  function updateParticles(dt) {
+    for (const p of state.particles) {
+      p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= (1 - dt * 2); p.vy *= (1 - dt * 2);
+    }
+    state.particles = state.particles.filter(p => p.life > 0);
+  }
+
+  function updateUI() {
+    ui.gold.textContent = Math.floor(state.gold);
+    ui.income.textContent = `${totalIncome().toFixed(1)}/s`;
+    ui.bed.textContent = state.bedLv;
+    ui.door.textContent = `${Math.max(0,Math.round(state.doorHp))}/${doorMax(state.doorLv)}`;
+    ui.wave.textContent = state.wave + (isBossNight() ? 'B' : '');
+    ui.clock.textContent = clockLabel();
+    /* no single ghost */
+    const liveN = livingEnemies();
+    const bossN = liveN.find(e => e.kind === 'boss');
+    if (bossN) ui.ghost.textContent = `BOSS ${Math.ceil(bossN.hp)}`;
+    else if (liveN.length) ui.ghost.textContent = `${liveN.length} 只`;
+    else ui.ghost.textContent = state.spawnQueue.length ? `待${state.spawnQueue.length}` : '—';
+
+    const bc = bedCost(state.bedLv);
+    ui.bedName.textContent = `升床 ${state.bedLv}→${state.bedLv+1}`;
+    ui.bedCost.textContent = `${bc}`;
+    ui.bedDesc.textContent = `收入 ${totalIncome().toFixed(1)}/s`;
+    $('btn-up-bed').disabled = state.gold < bc || state.phase !== 'playing' || state.paused;
+
+    const dc = doorCost(state.doorLv);
+    ui.doorName.textContent = `加固门 ${state.doorLv}→${state.doorLv+1}`;
+    ui.doorCost.textContent = `${dc}`;
+    ui.doorDesc.textContent = `上限 ${doorMax(state.doorLv)}`;
+    $('btn-up-door').disabled = state.gold < dc || state.phase !== 'playing' || state.paused;
+
+    document.querySelectorAll('.item[data-tower]').forEach(btn => {
+      btn.disabled = state.gold < towerDefs[btn.dataset.tower].cost || state.phase !== 'playing' || state.paused;
+    });
+    if (state.selectedItem && towerDefs[state.selectedItem.type]) refreshSelectPanel();
+
+    const tmList = document.getElementById('teammate-list');
+    if (tmList) {
+      tmList.innerHTML = teammates.map(t => {
+        const pct = Math.max(0, Math.min(100, (t.doorHp / t.doorMax) * 100));
+        return `<div class="tm ${t.dead ? 'dead' : ''}">
+          <b>${t.name}</b><span>${t.dead ? '已失守' : Math.ceil(t.doorHp) + '/' + t.doorMax}</span>
+          <div class="bar"><i style="width:${pct}%"></i></div>
+        </div>`;
+      }).join('') || '<div class="tm">尚未选房</div>';
+    }
+
+    // live mini map — throttled, not every frame
+    const mini = document.getElementById('room-mini');
+    const miniLabel = document.getElementById('room-mini-label');
+    if (mini && state.roomDef) {
+      const now = performance.now();
+      if (!state._miniT || now - state._miniT > 400) {
+        state._miniT = now;
+        drawRoomPreview(mini, state.roomDef, 'mini');
+        if (miniLabel) {
+          let free = 0;
+          for (let y = 0; y < GRID.rows; y++)
+            for (let x = 0; x < GRID.cols; x++)
+              if (!cells[y] || !cells[y][x]) free++;
+          miniLabel.textContent = `${state.roomDef.name} · ${GRID.cols}×${GRID.rows} · 空格 ${free}`;
+        }
+      }
+    }
+  }
+
+  // ---------- Pixel draw ----------
+  const C = {
+    bg: '#0b0e14',
+    wall: '#1a2430',
+    wall2: '#141c26',
+    floor: '#121a22',
+    grid: '#1c2832',
+    neon: '#3dff9a',
+    neonD: '#1a8f55',
+    gold: '#f0c14b',
+    danger: '#ff4d5e',
+    ghost: '#9b7bff',
+    ghostD: '#6b4fd4',
+    door: '#8a451f',
+    doorD: '#5a2a12',
+    frost: '#6ecbff',
+    cannon: '#ffb347',
+    ink: '#dce8f0',
+    muted: '#5a7080',
+  };
+
+  function px(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  }
+
+  function draw() {
+    if (!ui.screenGame.classList.contains('show')) return;
+    ctx.imageSmoothingEnabled = false;
+    // draw in logical 320x180 space into a 3x buffer
+    ctx.setTransform(BUF, 0, 0, BUF, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const sh = state.shakes;
+    const ox = sh && !reduceMotion ? ((Math.random()*2|0) - 0.5) * 2 * sh : 0;
+    const oy = sh && !reduceMotion ? ((Math.random()*2|0) - 0.5) * 2 * sh : 0;
+    ctx.save();
+    ctx.translate(ox, oy);
+
+    drawScene();
+    drawBed();
+    drawDoor();
+    drawSpots();
+    for (const e of state.enemies) drawEnemy(e);
+    drawBeams();
+    drawBullets();
+    drawParticles();
+    drawFloaters();
+    drawHudPixel();
+    ctx.restore();
+
+    if (state.flash > 0) {
+      ctx.fillStyle = `rgba(255,77,94,${state.flash * 0.4})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+    // CRT scanlines (subtle)
+    ctx.fillStyle = 'rgba(0,0,0,.12)';
+    for (let y = 0; y < H; y += 2) ctx.fillRect(0, y, W, 1);
+  }
+
+  function pixelCircle(cx, cy, r, color) {
+    for (let y = -r; y <= r; y++) {
+      for (let x = -r; x <= r; x++) {
+        const d = x * x + y * y;
+        if (d <= r * r && d > (r - 1.2) * (r - 1.2)) px(cx + x, cy + y, 1, 1, color);
+      }
+    }
+  }
+
+  function lightHalo(x, y, r, color, intensity = 1) {
+    if (!isFinite(x) || !isFinite(y) || !isFinite(r) || r < 1) return;
+    r = Math.min(r, 72);
+    intensity = Math.max(0, Math.min(1, intensity || 0));
+    if (intensity <= 0) return;
+    // stepped pixel light pool (no smooth gradient — keep pixel look)
+    const layers = [
+      { r: r, a: 0.04 * intensity },
+      { r: Math.floor(r * 0.7), a: 0.07 * intensity },
+      { r: Math.floor(r * 0.45), a: 0.1 * intensity },
+      { r: Math.floor(r * 0.22), a: 0.14 * intensity },
+    ];
+    for (const L of layers) {
+      if (L.r < 1) continue;
+      ctx.globalAlpha = Math.min(0.35, L.a);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(Math.round(x), Math.round(y), L.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /**
+   * Flashlight / torch beam from a lamp head.
+   * (x,y) source, ang direction (rad), len beam length,
+   * spread half-angle in radians, color, intensity 0..1
+   */
+  function lightCone(x, y, ang, len, spread, color, intensity = 1) {
+    if (!isFinite(x) || !isFinite(y) || !isFinite(ang) || !isFinite(len)) return;
+    len = Math.max(8, Math.min(len, 160));
+    spread = Math.max(0.08, Math.min(spread, 0.9));
+    intensity = Math.max(0, Math.min(1, intensity || 0));
+    if (intensity <= 0.02) return;
+
+    const cos = Math.cos(ang), sin = Math.sin(ang);
+    // side vector
+    const pxs = -sin, pys = cos;
+
+    // layered trapezoids: bright core near source → wide soft edge
+    const slices = [
+      { t0: 0.0, t1: 0.35, w: 0.22, a: 0.16 },
+      { t0: 0.15, t1: 0.65, w: 0.55, a: 0.09 },
+      { t0: 0.35, t1: 0.9, w: 0.85, a: 0.055 },
+      { t0: 0.55, t1: 1.0, w: 1.0, a: 0.03 },
+    ];
+
+    for (const s of slices) {
+      const d0 = len * s.t0;
+      const d1 = len * s.t1;
+      const w0 = Math.tan(spread) * d0 * s.w;
+      const w1 = Math.tan(spread) * d1 * s.w;
+      const x0 = x + cos * d0, y0 = y + sin * d0;
+      const x1 = x + cos * d1, y1 = y + sin * d1;
+      ctx.globalAlpha = Math.min(0.22, s.a * intensity);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(x0 + pxs * w0 * 0.15, y0 + pys * w0 * 0.15);
+      ctx.lineTo(x1 + pxs * w1, y1 + pys * w1);
+      ctx.lineTo(x1 - pxs * w1, y1 - pys * w1);
+      ctx.lineTo(x0 - pxs * w0 * 0.15, y0 - pys * w0 * 0.15);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // hot core ray
+    ctx.globalAlpha = Math.min(0.2, 0.12 * intensity);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x + cos * 2, y + sin * 2);
+    ctx.lineTo(x + cos * len * 0.85, y + sin * len * 0.85);
+    ctx.stroke();
+
+    // floor hit pool at beam end
+    const fx = x + cos * len;
+    const fy = y + sin * len;
+    lightHalo(fx, fy, Math.tan(spread) * len * 0.55, color, intensity * 0.55);
+
+    // lamp head bloom
+    lightHalo(x, y, 5, color, Math.min(1, intensity * 0.9));
+    ctx.globalAlpha = 1;
+  }
+
+  function drawScene() {
+    syncStageFromGrid();
+    const rname = (state.roomDef && state.roomDef.name) || '宿舍';
+    px(0, 0, W, H, C.bg);
+    // corridor
+    const cx0 = room.x + room.w;
+    px(cx0, 0, W - cx0, H, '#0a1016');
+    for (let y = 0; y < H; y += 8) px(cx0, y, W - cx0, 1, '#121c26');
+    for (let x = cx0; x < W; x += 12) px(x, 0, 1, H, '#0e1620');
+    px(cx0, 0, W - cx0, 4, '#060a10');
+    px(cx0, 4, W - cx0, 1, '#1a2834');
+
+    // corridor lamps — flashlight cones pointing down corridor
+    const midY = Math.round((door.y + door.h / 2) || (H / 2));
+    for (let i = 0; i < 3; i++) {
+      const lx = cx0 + 22 + i * 36;
+      const n = Math.sin(state.time * 3.1 + i * 2.3) + Math.sin(state.time * 11 + i);
+      const on = n > -1.15;
+      const bright = on ? (n > 0.6 ? 1 : 0.72) : 0.12;
+      // fixture
+      px(lx - 1, 1, 14, 4, '#121a22');
+      px(lx + 1, 5, 10, 2, on ? '#d8ecf8' : '#2a3844');
+      if (on) {
+        px(lx + 3, 7, 6, 1, '#9ec0d4');
+        // main torch beam down / slightly toward door
+        const ang = Math.PI / 2 + (i - 1) * 0.08;
+        lightCone(lx + 6, 8, ang, 70 + i * 8, 0.42, '#a8c8e0', bright);
+        // side spill
+        lightCone(lx + 6, 8, ang + 0.55, 40, 0.35, '#88b0c8', bright * 0.45);
+        lightCone(lx + 6, 8, ang - 0.55, 40, 0.35, '#88b0c8', bright * 0.45);
+      }
+    }
+
+    // room shell
+    px(room.x, room.y, room.w, room.h, '#0e1620');
+    px(room.x + 1, room.y + 1, room.w - 2, room.h - 2, C.wall);
+    px(GRID.ox - 2, GRID.oy - 2, GRID.w + 4, GRID.h + 4, C.floor);
+
+    // ceiling neon strip + multi-spot flashlight from ceiling
+    const wave = Math.sin(state.time * 7) * 0.5 + Math.sin(state.time * 13.7) * 0.3;
+    const neonOn = wave > -0.9;
+    const neonPow = neonOn ? (wave > 0.35 ? 1 : 0.7) : 0.1;
+    px(room.x + 2, room.y + 1, room.w - 4, 2, neonOn ? C.neon : '#0f2a20');
+    if (neonOn) {
+      px(room.x + 2, room.y + 3, room.w - 4, 1, `rgba(61,255,154,${0.2 * neonPow})`);
+      // several ceiling torches aimed at floor (like hanging work lights)
+      const spots = Math.max(2, Math.floor((room.w - 20) / 36));
+      for (let i = 0; i < spots; i++) {
+        const sx = room.x + 14 + i * 36 + (i % 2) * 4;
+        const sway = Math.sin(state.time * 1.7 + i) * 0.06;
+        lightCone(sx, room.y + 4, Math.PI / 2 + sway, Math.min(90, GRID.h + 20), 0.38, '#3dff9a', 0.55 * neonPow);
+      }
+      // soft ambient under strip
+      lightHalo(room.x + room.w * 0.45, room.y + 28, 36, '#3dff9a', 0.25 * neonPow);
+    }
+
+    // window moon beam into room (angled flashlight)
+    const wx = room.x + Math.max(20, room.w - 42);
+    const wy = room.y + 12;
+    lightCone(wx + 8, wy + 4, Math.PI / 2 + 0.45, 55, 0.28, '#8ab4d8', 0.55);
+
+    ctx.fillStyle = C.neon;
+    ctx.font = '6px monospace';
+    ctx.fillText(`${rname} ${GRID.cols}×${GRID.rows}`, room.x + 4, room.y + 12);
+    ctx.fillStyle = C.muted;
+    ctx.fillText('CORRIDOR', cx0 + 6, 14);
+  }
+  function drawBed() {
+    const lv = state.bedLv;
+    const flash = state.bedFlash > 0;
+    const pulse = 0.5 + Math.sin(state.time * 2.5) * 0.2;
+    const bed = bedPixel();
+    // income aura — stronger with level
+    lightHalo(bed.x + bed.w/2, bed.y + bed.h/2, 20 + lv * 4, '#3dff9a', (0.35 + lv * 0.08) * pulse + flash);
+
+    // frame upgrades with level
+    if (lv <= 1) {
+      // 破草席床
+      px(bed.x - 1, bed.y - 1, bed.w + 2, bed.h + 2, '#0a1410');
+      px(bed.x, bed.y, bed.w, bed.h, '#1a2820');
+      px(bed.x, bed.y, bed.w, 1, '#243830');
+      px(bed.x + 1, bed.y + 10, bed.w - 2, bed.h - 12, flash ? '#3dff9a' : '#2a8a5a');
+      px(bed.x + 3, bed.y + 16, bed.w - 6, bed.h - 20, '#14563a');
+      px(bed.x + 2, bed.y + 2, bed.w - 4, 7, '#c8d0c8');
+      // straw edges
+      for (let i = 0; i < 4; i++) px(bed.x + 2 + i * 6, bed.y + bed.h - 2, 3, 2, '#3a4a28');
+    } else if (lv === 2) {
+      // 木床架
+      px(bed.x - 2, bed.y - 2, bed.w + 4, bed.h + 4, '#1a1410');
+      px(bed.x - 1, bed.y - 1, bed.w + 2, bed.h + 2, '#3a2a18');
+      px(bed.x, bed.y, bed.w, bed.h, '#4a3820');
+      px(bed.x + 1, bed.y + 1, bed.w - 2, bed.h - 2, '#2a2014');
+      px(bed.x + 1, bed.y + 10, bed.w - 2, bed.h - 14, flash ? '#3dff9a' : '#2a8a5a');
+      px(bed.x + 1, bed.y + 10, bed.w - 2, 2, '#3aa86a');
+      px(bed.x + 3, bed.y + 16, bed.w - 6, bed.h - 20, '#14563a');
+      px(bed.x + 2, bed.y + 2, bed.w - 4, 7, '#e0e8e0');
+      // headboard
+      px(bed.x, bed.y - 4, bed.w, 4, '#5a4028');
+      px(bed.x + 2, bed.y - 3, bed.w - 4, 2, '#6a5038');
+    } else if (lv === 3) {
+      // 弹簧床垫 + 铁架
+      px(bed.x - 2, bed.y - 2, bed.w + 4, bed.h + 4, '#0e1418');
+      px(bed.x - 1, bed.y - 1, bed.w + 2, bed.h + 2, '#3a4a55');
+      px(bed.x, bed.y, bed.w, bed.h, '#2a3844');
+      // mattress
+      px(bed.x + 1, bed.y + 8, bed.w - 2, bed.h - 12, flash ? '#3dff9a' : '#3a9a6a');
+      px(bed.x + 1, bed.y + 8, bed.w - 2, 3, flash ? '#7dffb8' : '#4ab87a');
+      px(bed.x + 2, bed.y + 14, bed.w - 4, bed.h - 20, '#1a6a48');
+      // springs hint
+      for (let i = 0; i < 4; i++) px(bed.x + 4 + i * 5, bed.y + 12, 2, 2, '#c8d8e0');
+      px(bed.x + 2, bed.y + 2, bed.w - 4, 6, '#f0f4f0');
+      // iron posts
+      px(bed.x - 1, bed.y - 6, 2, 6, '#8a9aa8');
+      px(bed.x + bed.w - 1, bed.y - 6, 2, 6, '#8a9aa8');
+      px(bed.x, bed.y - 7, bed.w, 2, '#a0b0c0');
+    } else {
+      // 豪华床 / 金边
+      px(bed.x - 2, bed.y - 3, bed.w + 4, bed.h + 5, '#0a0e12');
+      px(bed.x - 1, bed.y - 2, bed.w + 2, bed.h + 3, '#c9a44a');
+      px(bed.x, bed.y - 1, bed.w, bed.h + 1, '#8a6a20');
+      px(bed.x + 1, bed.y, bed.w - 2, bed.h - 1, '#1a2820');
+      px(bed.x + 1, bed.y + 8, bed.w - 2, bed.h - 12, flash ? '#3dff9a' : '#2aaa70');
+      px(bed.x + 1, bed.y + 8, bed.w - 2, 3, '#5ad890');
+      px(bed.x + 3, bed.y + 14, bed.w - 6, bed.h - 20, '#0e6040');
+      px(bed.x + 2, bed.y + 1, bed.w - 4, 7, '#ffffff');
+      // gold trim
+      px(bed.x, bed.y - 4, bed.w, 2, '#f0c14b');
+      px(bed.x + 2, bed.y - 3, bed.w - 4, 1, '#ffe08a');
+    }
+
+    // sleeper
+    px(bed.x + 7, bed.y + 18, 10, 8, '#0d2018');
+    const br = Math.sin(state.time * 2) > 0 ? 0 : 1;
+    px(bed.x + 8, bed.y + 14 + br, 8, 4, '#0a1a14');
+
+    // nightstand cup
+    px(bed.x - 6, bed.y + 10, 5, 7, '#1a2430');
+    px(bed.x - 5, bed.y + 12, 3, 2, '#f0c14b');
+    if (lv >= 2) lightHalo(bed.x - 4, bed.y + 12, 6, '#f0c14b', 0.6);
+
+    for (let i = 0; i < lv; i++) {
+      const blink = Math.sin(state.time * 3 + i) > 0;
+      px(bed.x + 2 + i * 4, bed.y - 8, 2, 2, blink ? C.neon : C.neonD);
+    }
+    ctx.fillStyle = C.gold;
+    ctx.font = '6px monospace';
+    const names = ['', '草席', '木床', '弹簧床', '豪华床'];
+    ctx.fillText(`${names[Math.min(4,lv)]}+${totalIncome().toFixed(0)}/s · 2×3格`, bed.x, bed.y + bed.h + 8);
+  }
+
+  function drawDoor() {
+    const lv = state.doorLv;
+    const ratio = Math.max(0, state.doorHp / doorMax(state.doorLv));
+    const hit = state.doorFlash > 0;
+    const low = ratio < 0.35;
+    const healPulse = state.doorHealPulse || 0;
+    const hasRepair = allPlaced().some(it => it.type === 'repair');
+
+    // door light: status glow
+    if (low) lightHalo(door.x + door.w/2, door.y + door.h/2, 22, '#ff4d5e', 0.8 + Math.sin(state.time * 8) * 0.3);
+    else if (hit) lightHalo(door.x + door.w/2, door.y + door.h/2, 18, '#ff8a4a', 1);
+    else if (healPulse > 0.05) lightHalo(door.x + door.w/2, door.y + door.h/2, 16 + healPulse * 10, '#7dffa0', 0.35 + healPulse * 0.5);
+    else lightHalo(door.x + door.w/2, door.y + door.h/2, 14 + lv * 2, lv >= 3 ? '#a0b8c8' : '#c45c26', 0.35);
+    // door porch flashlight into corridor
+    lightCone(door.x + door.w + 2, door.y + 8, Math.PI / 2 + 0.15, 36 + lv * 4, 0.4,
+      low ? '#ff4d5e' : '#c45c26', low ? 0.75 : 0.45);
+    lightCone(door.x + door.w + 2, door.y + door.h - 8, Math.PI / 2 - 0.1, 30, 0.35,
+      low ? '#ff4d5e' : '#c45c26', low ? 0.5 : 0.3);
+
+    // healing beam from each repair bot to door
+    if (hasRepair && state.doorHp < doorMax(state.doorLv) + 0.01) {
+      for (const s of allPlaced()) {
+        if (s.type !== 'repair') continue;
+        const c = itemCenter(s);
+        const dx = door.x + door.w / 2 - c.x;
+        const dy = door.y + door.h / 2 - c.y;
+        const ang = Math.atan2(dy, dx);
+        const dist = Math.hypot(dx, dy) || 1;
+        // soft connection beam
+        ctx.strokeStyle = '#7dffa0';
+        ctx.globalAlpha = 0.15 + healPulse * 0.35;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([3, 3]);
+        ctx.lineDashOffset = -state.time * 20;
+        ctx.beginPath();
+        ctx.moveTo(c.x, c.y);
+        ctx.lineTo(c.x + Math.cos(ang) * dist * 0.5, c.y + Math.sin(ang) * dist * 0.5);
+        ctx.stroke();
+        ctx.globalAlpha = 0.35 + healPulse * 0.4;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(c.x + Math.cos(ang) * dist * 0.5, c.y + Math.sin(ang) * dist * 0.5);
+        ctx.lineTo(door.x + door.w / 2, door.y + door.h / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 1;
+      }
+    }
+
+    // frame always wood-ish wall hole
+    px(door.x - 3, door.y - 3, door.w + 8, door.h + 6, '#05070a');
+    px(door.x - 2, door.y - 2, door.w + 4, door.h + 4, '#1a1210');
+    px(door.x - 2, door.y - 2, door.w + 4, 2, '#2a2018');
+
+    const doorName = (() => {
+      if (lv <= 1) return '栅栏门';
+      if (lv === 2) return '木门';
+      if (lv === 3) return '铁门';
+      return '装甲门';
+    })();
+
+    if (lv <= 1) {
+      // 栅栏门 — vertical bars, gaps you can see through
+      px(door.x, door.y, door.w, door.h, '#0a0e12');
+      // back darkness
+      px(door.x + 1, door.y + 1, door.w - 2, door.h - 2, '#05070a');
+      // vertical wooden bars
+      for (let i = 0; i < 4; i++) {
+        const bx = door.x + 1 + i * 2;
+        const bar = hit || low ? '#8a4030' : '#6a4a28';
+        px(bx, door.y + 1, 1, door.h - 2, bar);
+        px(bx, door.y + 1, 1, 1, hit ? '#ff9a60' : '#8a6040');
+      }
+      // cross braces
+      px(door.x, door.y + 12, door.w, 2, hit ? '#c45c26' : '#7a5530');
+      px(door.x, door.y + 30, door.w, 2, hit ? '#c45c26' : '#7a5530');
+      px(door.x, door.y + 44, door.w, 2, hit ? '#c45c26' : '#7a5530');
+      // top beam
+      px(door.x, door.y, door.w, 2, '#8a6040');
+    } else if (lv === 2) {
+      // 木门 — solid planks
+      const slab = low ? (hit ? '#ff4d5e' : '#8a3030') : (hit ? '#d07040' : '#8a5528');
+      px(door.x, door.y, door.w, door.h, slab);
+      px(door.x + 1, door.y + 1, door.w - 2, door.h - 2, low ? '#5a2020' : '#5a3818');
+      // planks
+      px(door.x + 1, door.y + 2, door.w - 2, 10, slab);
+      px(door.x + 1, door.y + 14, door.w - 2, 10, slab);
+      px(door.x + 1, door.y + 26, door.w - 2, 10, slab);
+      px(door.x + 1, door.y + 38, door.w - 2, 10, slab);
+      // iron hinges
+      px(door.x, door.y + 8, 3, 4, '#5a6a78');
+      px(door.x, door.y + 36, 3, 4, '#5a6a78');
+      // knob
+      px(door.x + door.w - 3, door.y + door.h/2 - 1, 3, 3, hit ? '#ffd0a0' : '#c9a46a');
+    } else if (lv === 3) {
+      // 铁门 — metal plates + rivets
+      const base = low ? '#6a3038' : hit ? '#8a9aaa' : '#5a6a78';
+      const dark = low ? '#3a1820' : '#3a4a58';
+      px(door.x, door.y, door.w, door.h, '#2a343c');
+      px(door.x + 1, door.y + 1, door.w - 2, door.h - 2, dark);
+      px(door.x + 1, door.y + 1, door.w - 2, 20, base);
+      px(door.x + 1, door.y + 23, door.w - 2, 20, base);
+      // center seam
+      px(door.x + 3, door.y + 1, 1, door.h - 2, dark);
+      px(door.x + 4, door.y + 1, 1, door.h - 2, hit ? '#c0d0e0' : '#7a8a98');
+      // rivets
+      for (let ry = 4; ry < door.h - 4; ry += 8) {
+        px(door.x + 1, door.y + ry, 1, 1, '#a0b0c0');
+        px(door.x + door.w - 2, door.y + ry, 1, 1, '#a0b0c0');
+      }
+      // handle
+      px(door.x + door.w - 2, door.y + door.h/2 - 2, 2, 5, '#c0d0e0');
+      // small window slit
+      px(door.x + 2, door.y + 10, 4, 2, '#0a1218');
+    } else {
+      // 装甲门 — reinforced iron + warning stripes
+      px(door.x, door.y, door.w, door.h, '#1a2028');
+      px(door.x + 1, door.y + 1, door.w - 2, door.h - 2, low ? '#4a2030' : hit ? '#9ab0c0' : '#4a5a6a');
+      px(door.x + 1, door.y + 1, door.w - 2, 3, '#c0d0e0');
+      px(door.x + 1, door.y + door.h - 4, door.w - 2, 3, '#c0d0e0');
+      // diagonal hazard stripes
+      for (let i = 0; i < 6; i++) {
+        const sy = door.y + 6 + i * 7;
+        px(door.x + 1, sy, door.w - 2, 3, i % 2 ? '#f0c14b' : (low ? '#5a2030' : '#2a343c'));
+      }
+      // center plate
+      px(door.x + 2, door.y + 20, door.w - 4, 14, low ? '#6a3040' : '#3a4a5a');
+      px(door.x + 3, door.y + 22, door.w - 6, 2, '#8a9aaa');
+      // lock
+      px(door.x + door.w - 4, door.y + door.h/2 - 2, 3, 5, hit ? '#ffd0a0' : '#e0e8f0');
+      px(door.x + door.w - 3, door.y + door.h/2, 1, 2, '#1a2028');
+    }
+
+    // damage cracks
+    if (ratio < 0.85) {
+      const cracks = Math.ceil((1 - ratio) * 4);
+      for (let i = 0; i < cracks; i++) {
+        const cy = door.y + 6 + i * 10;
+        px(door.x + 2, cy, 2, 3, '#1a0808');
+        px(door.x + 4, cy + 3, 2, 3, '#1a0808');
+        if (ratio < 0.4) px(door.x + 3, cy + 1, 1, 2, '#3a1010');
+      }
+    }
+
+    // claw marks
+    const attacking = state.enemies.find(e => !e.dead && e.phase === 'attack' && e.clawT > 0);
+    if (attacking && Math.sin(state.time * 30) > 0) {
+      for (let i = -1; i <= 1; i++) {
+        px(door.x + door.w + 2, door.y + 12 + i * 8, 4, 2, C.danger);
+        px(door.x + 2, door.y + 16 + i * 8, 4, 2, C.danger);
+      }
+    }
+
+    // HP bar
+    px(door.x - 5, door.y - 1, 4, door.h + 2, '#000');
+    px(door.x - 4, door.y, 2, door.h, '#121a22');
+    const bh = Math.floor(door.h * ratio);
+    const hc = ratio > 0.5 ? C.neon : ratio > 0.25 ? C.gold : C.danger;
+    px(door.x - 4, door.y + door.h - bh, 2, bh, hc);
+    if (ratio < 0.3 && Math.sin(state.time * 10) > 0) px(door.x - 6, door.y + door.h - bh - 1, 5, 2, C.danger);
+
+    ctx.fillStyle = low ? C.danger : C.neon;
+    ctx.font = '6px monospace';
+    ctx.fillText(`302 ${doorName}`, door.x - 8, door.y - 5);
+  }
+
+  function drawGrid() {
+    px(GRID.ox - 1, GRID.oy - 1, GRID.w + 2, GRID.h + 2, '#0a1016');
+    for (let y = 0; y < GRID.rows; y++) {
+      for (let x = 0; x < GRID.cols; x++) {
+        const c = cells[y] && cells[y][x];
+        const x0 = GRID.ox + x * CELL;
+        const y0 = GRID.oy + y * CELL;
+        if (!c) {
+          px(x0, y0, CELL - 1, CELL - 1, ((x + y) % 2 === 0) ? '#141c24' : '#111820');
+          px(x0, y0, CELL - 1, 1, '#1e2a34');
+        } else if (c.type === 'block') {
+          px(x0, y0, CELL - 1, CELL - 1, '#3a2a18');
+          px(x0 + 2, y0 + 2, CELL - 5, CELL - 5, '#4a3820');
+        }
+      }
+    }
+    if (state.hoverCell && state.selectedBuild) {
+      const def = towerDefs[state.selectedBuild];
+      const { gx, gy } = state.hoverCell;
+      const ok = canPlace(gx, gy, def.w, def.h) && state.gold >= def.cost;
+      const col = ok ? 'rgba(61,255,154,.35)' : 'rgba(255,77,94,.35)';
+      for (let y = 0; y < def.h; y++) {
+        for (let x = 0; x < def.w; x++) {
+          const cx = gx + x, cy = gy + y;
+          if (cx < 0 || cy < 0 || cx >= GRID.cols || cy >= GRID.rows) continue;
+          px(GRID.ox + cx * CELL, GRID.oy + cy * CELL, CELL - 1, CELL - 1, col);
+        }
+      }
+      const a = cellToPixel(gx, gy);
+      ctx.strokeStyle = ok ? C.neon : C.danger;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(a.x - 0.5, a.y - 0.5, def.w * CELL, def.h * CELL);
+    }
+  }
+
+  function drawItem(item) {
+    const def = towerDefs[item.type];
+    if (!def) return;
+    const p = cellToPixel(item.gx, item.gy);
+    const w = item.w * CELL;
+    const h = item.h * CELL;
+    const cx = p.x + w / 2;
+    const cy = p.y + h / 2;
+    const selected = state.selectedItem === item;
+    const flash = Math.min(1, Math.max(0, item.flash || 0));
+    const charge = Math.min(1, Math.max(0, item.charge || 0));
+    const ang = item.aim || 0;
+    const lv = item.lv || 1;
+    const combat = item.type !== 'repair' && item.type !== 'idol';
+
+    // idle / fire glow (capped)
+    const glowI = combat
+      ? Math.min(0.7, 0.16 + lv * 0.05 + (flash ? 0.35 : 0) + charge * 0.2)
+      : 0.2;
+    lightHalo(cx, cy, 8 + lv * 3 + (flash ? 6 : 0), def.color, glowI);
+    if (flash) lightHalo(cx, cy, 14 + lv * 2, '#ffffff', 0.25);
+    // aim flashlight when locked on a target
+    if (combat && item.aim != null && (item.flash || 0) > 0.05) {
+      lightCone(cx, cy, item.aim, 28 + lv * 6, 0.28, def.color, 0.55 + flash * 0.2);
+    }
+
+    px(p.x, p.y, w, h, '#0a1016');
+    px(p.x + 1, p.y + 1, w - 2, h - 2, flash ? '#243040' : '#1a242c');
+    px(p.x + 1, p.y + 1, w - 2, 1, flash ? '#ffffff' : def.color);
+    if (selected) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(p.x - 0.5, p.y - 0.5, w, h);
+    }
+
+    const sx = Math.round(cx), sy = Math.round(cy);
+    const rec = (item.recoil || 0) > 0 ? Math.round((item.recoil / 0.22) * 3) : 0;
+    const bx = Math.round(Math.cos(ang) * (6 + item.lv + rec));
+    const by = Math.round(Math.sin(ang) * (6 + item.lv + rec));
+
+    if (item.type === 'arrow') {
+      px(sx - 2, sy - 3, 4, 6, item.lv >= 3 ? '#c9a44a' : '#d8c48a');
+      px(sx - 1, sy - 2, 2, 4, def.color);
+      // barrel
+      px(sx + Math.round(Math.cos(ang)*3) - 1, sy + Math.round(Math.sin(ang)*3) - 1, 2, 2, '#5a4a30');
+      // muzzle tip
+      px(sx + bx - 1, sy + by - 1, 2, 2, flash ? '#ffffff' : def.color);
+      if (flash) {
+        // small flash cone
+        px(sx + bx, sy + by - 1, 3, 3, '#eafff4');
+        px(sx + bx + 2, sy + by, 2, 2, def.color);
+      }
+    } else if (item.type === 'frost') {
+      px(sx - 3, sy - 6, 6, 12, '#0d2230');
+      px(sx - 2, sy - 2, 4, 4, flash ? '#ffffff' : def.color);
+      px(sx - 1, sy - 1, 2, 2, '#dff4ff');
+      if (flash || Math.sin(state.time * 6) > 0) {
+        px(sx - 5, sy, 2, 1, def.color);
+        px(sx + 4, sy - 2, 2, 1, '#dff4ff');
+      }
+      if (flash) {
+        px(sx + bx - 1, sy + by - 1, 2, 2, '#e8f8ff');
+      }
+    } else if (item.type === 'cannon') {
+      px(sx - 6, sy - 6, 12, 12, '#2a1c10');
+      px(sx - 4, sy - 4, 8, 8, item.lv >= 3 ? '#c9a44a' : '#6a4a22');
+      const mx2 = Math.round(Math.cos(ang) * 4);
+      const my2 = Math.round(Math.sin(ang) * 4);
+      px(sx + mx2 - 2, sy + my2 - 2, 4, 4, '#5a3a18');
+      px(sx + bx - 2, sy + by - 2, 4, 4, charge > 0 || flash ? '#fff3c4' : def.color);
+      if (flash) {
+        px(sx + bx + 2, sy + by - 2, 5, 5, '#ffd080');
+        px(sx + bx + 5, sy + by - 1, 3, 3, '#ffffff');
+      }
+    } else if (item.type === 'repair') {
+      px(sx - 4, sy - 3, 8, 6, '#1a3a28');
+      px(sx - 2, sy - 1, 4, 3, flash ? '#d0ffe0' : def.color);
+      const pu = Math.sin(state.time * 6) > 0;
+      px(sx - 6, sy - 4, 2, 2, pu ? def.color : '#3a6a50');
+      px(sx + 5, sy - 4, 2, 2, pu ? '#3a6a50' : def.color);
+      px(sx - 1, sy - 5, 2, 2, '#7dffa0');
+      lightHalo(sx, sy, 7, def.color, 0.35 + (pu ? 0.2 : 0));
+    } else if (item.type === 'idol') {
+      px(sx - 5, sy - 3, 10, 6, '#3a2a10');
+      for (let i = 0; i < item.lv; i++) px(sx - 3 + i * 2, sy + 1 - i, 3, 2, def.color);
+      px(sx - 1, sy - 3, 2, 2, flash ? '#ffffff' : '#fff3c4');
+    } else if (item.type === 'spark') {
+      px(sx - 3, sy - 3, 6, 6, '#2a3010');
+      px(sx - 2, sy - 2, 4, 4, def.color);
+      px(sx - 1, sy - 1, 2, 2, flash ? '#ffffff' : '#ffffc0');
+      if (flash) {
+        px(sx - 5, sy - 5, 2, 2, '#ffff88');
+        px(sx + 4, sy - 4, 2, 2, '#ffff88');
+        px(sx - 4, sy + 4, 2, 2, '#ffff88');
+        px(sx + 4, sy + 4, 2, 2, '#ffff88');
+      }
+    } else if (item.type === 'poison') {
+      px(sx - 2, sy - 4, 4, 8, '#3a2060');
+      px(sx - 1, sy - 5, 2, 3, flash ? '#e0d0ff' : def.color);
+      px(sx - 1, sy, 2, 2, '#c4a0ff');
+      if (flash) px(sx + bx - 1, sy + by - 1, 2, 2, '#d0b0ff');
+    } else if (item.type === 'brazier') {
+      px(sx - 5, sy - 2, 10, 5, '#3a2010');
+      px(sx - 3, sy - 5, 6, 4, flash ? '#ffe0a0' : def.color);
+      px(sx - 1, sy - 6, 2, 2, '#ffd080');
+      if (flash) {
+        px(sx + bx - 2, sy + by - 2, 4, 4, '#ff8a40');
+        px(sx + bx, sy + by - 3, 2, 2, '#fff0c0');
+      }
+    } else if (item.type === 'eye') {
+      px(sx - 3, sy - 6, 6, 12, '#2a1020');
+      px(sx - 2, sy - 2, 4, 4, def.color);
+      px(sx - 1, sy - 1, 2, 2, flash ? '#ffffff' : '#fff');
+      if (flash) {
+        // long laser tip
+        px(sx + bx - 1, sy + by - 1, 3, 3, '#ff9ec0');
+        px(sx + bx + 2, sy + by, 2, 2, '#ffffff');
+      }
+    }
+
+    // charge ring when about to fire
+    if (charge > 0) {
+      const a = charge / 0.18;
+      ctx.strokeStyle = def.color;
+      ctx.globalAlpha = 0.3 + a * 0.5;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 8 + a * 6, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    for (let i = 0; i < item.lv; i++) px(p.x + 2 + i * 3, p.y + h - 3, 2, 1, def.color);
+  }
+
+  function drawBeams() {
+    for (const bm of state.beams) {
+      const a = Math.max(0, bm.life / bm.max);
+      ctx.globalAlpha = a;
+      ctx.strokeStyle = bm.color;
+      ctx.lineWidth = bm.kind === 'beam' ? 2 : bm.kind === 'hit' ? 2 : 1;
+      if (bm.kind === 'zig') {
+        // stepped lightning
+        ctx.beginPath();
+        const steps = 5;
+        ctx.moveTo(bm.x1, bm.y1);
+        for (let i = 1; i < steps; i++) {
+          const t = i / steps;
+          const x = bm.x1 + (bm.x2 - bm.x1) * t;
+          const y = bm.y1 + (bm.y2 - bm.y1) * t + (i % 2 ? 3 : -3) * a;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(bm.x2, bm.y2);
+        ctx.stroke();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      } else if (bm.kind === 'ring') {
+        ctx.beginPath();
+        ctx.arc(bm.x1, bm.y1, bm.x2 - bm.x1, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (bm.kind === 'hit') {
+        ctx.beginPath();
+        ctx.moveTo(bm.x1, bm.y1);
+        ctx.lineTo(bm.x2, bm.y2);
+        ctx.moveTo(bm.x1, bm.y1 - 4);
+        ctx.lineTo(bm.x2, bm.y2 + 4);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(bm.x1, bm.y1);
+        ctx.lineTo(bm.x2, bm.y2);
+        ctx.stroke();
+        ctx.strokeStyle = '#ffffff';
+        ctx.globalAlpha = a * 0.5;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 1;
+  }
+
+  function drawBullets() {
+    for (const b of state.bullets) {
+      const px0 = b.px != null ? b.px : b.x;
+      const py0 = b.py != null ? b.py : b.y;
+      // trail
+      if (b.px != null && isFinite(b.px) && isFinite(b.py)) {
+        ctx.strokeStyle = b.color;
+        ctx.globalAlpha = 0.35;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(b.px, b.py);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      ctx.lineWidth = 1;
+      // only glow heavy shots — avoid fill storm
+      if (b.kind === 'cannon' || b.kind === 'brazier' || b.kind === 'eye') {
+        lightHalo(b.x, b.y, 6, b.color, 0.4);
+      }
+
+      if (b.kind === 'arrow') {
+        px(b.x - 1, b.y, 2, 1, b.color);
+        px(b.x, b.y, 1, 1, '#eafff4');
+      } else if (b.kind === 'frost') {
+        px(b.x - 1, b.y - 1, 2, 2, b.color);
+        px(b.x, b.y, 1, 1, '#dff4ff');
+      } else if (b.kind === 'poison') {
+        px(b.x - 1, b.y - 1, 2, 2, b.color);
+        px(b.x, b.y, 1, 1, '#e0d0ff');
+      } else if (b.kind === 'eye') {
+        px(b.x - 2, b.y, 4, 1, b.color);
+        px(b.x - 1, b.y - 1, 2, 3, '#ff9ec0');
+        px(b.x, b.y, 1, 1, '#fff');
+      } else if (b.kind === 'brazier') {
+        px(b.x - 2, b.y - 2, 4, 4, '#ff6b2c');
+        px(b.x - 1, b.y - 1, 2, 2, '#ffd080');
+        px(b.x, b.y, 1, 1, '#fff');
+      } else {
+        px(b.x - 1, b.y - 1, 3, 3, '#5a3a18');
+        px(b.x, b.y - 1, 1, 1, b.color);
+        px(b.x - 1, b.y - 2, 2, 1, '#fff3c4');
+      }
+    }
+  }
+
+  function drawSpots() {
+    drawGrid();
+    // Range rules:
+    // 1) hover a placed combat tower → show its range
+    // 2) selected build + hover empty cell → placement preview
+    // never sticky after click/select
+    let rangeSpot = null, rangeR = 0, rangeColor = 'rgba(255,255,255,.28)';
+    if (state.hoverCell && !state.paused) {
+      const { gx, gy } = state.hoverCell;
+      const c = cells[gy] && cells[gy][gx];
+      if (c && c !== bedItem && towerDefs[c.type]) {
+        const kind = c.type;
+        const kd = towerDefs[kind];
+        if (kd && kd.range > 0 && kind !== 'repair' && kind !== 'idol') {
+          rangeSpot = itemCenter(c);
+          rangeR = Math.round(towerStats(kind, c.lv).range);
+          rangeColor = 'rgba(255,255,255,.3)';
+        }
+      } else if (!c && state.selectedBuild) {
+        const def = towerDefs[state.selectedBuild];
+        const combat = def && def.range > 0 && def.kind !== 'repair' && def.kind !== 'idol';
+        if (combat) {
+          const p = cellToPixel(gx, gy);
+          rangeSpot = { x: p.x + def.w * CELL / 2, y: p.y + def.h * CELL / 2 };
+          rangeR = Math.round(towerStats(state.selectedBuild, 1).range);
+          const ok = canPlace(gx, gy, def.w, def.h) && state.gold >= def.cost;
+          rangeColor = ok ? 'rgba(61,255,154,.3)' : 'rgba(255,77,94,.25)';
+        }
+      }
+    }
+    if (rangeSpot && rangeR > 0) pixelCircle(rangeSpot.x, rangeSpot.y, rangeR, rangeColor);
+    drawBed();
+    for (const item of allPlaced()) drawItem(item);
+  }
+
+  function drawEnemy(g) {
+    const dying = g.dead;
+    if (dying) return;
+    const bob = Math.sin(g.bob) > 0 ? 0 : 1;
+    const lunge = g.lunge > 0 ? -2 : 0;
+    const x = Math.round(g.x + lunge);
+    const y = Math.round(g.y + bob);
+    const s = Math.max(1, Math.round(g.scale || 1));
+    const hurt = g.hurt > 0;
+    const isBoss = g.kind === 'boss';
+    const isElite = g.kind === 'elite';
+    ctx.save();
+    lightHalo(x, y, isBoss ? 22 : isElite ? 14 : 10, g.color, isBoss ? 0.9 : 0.4);
+
+    const body = hurt ? '#ffd0e8' : (g.phase === 'attack' ? '#c4a0ff' : g.color);
+    const dark = hurt ? '#e8a0c8' : '#5a4080';
+
+    if (isBoss) {
+      px(x - 4, y - 9, 2, 2, C.gold);
+      px(x - 2, y - 10, 2, 3, '#ffe08a');
+      px(x, y - 9, 2, 2, C.gold);
+      px(x + 2, y - 10, 2, 3, '#ffe08a');
+    }
+
+    px(x - 4*s, y - 4*s, 8*s, 8*s, body);
+    px(x - 3*s, y - 5*s, 6*s, 2*s, body);
+    px(x - 3*s, y + 4*s, 2*s, 3*s, dark);
+    px(x, y + 4*s, 2*s, 4*s, body);
+    px(x + 2*s, y + 4*s, 2*s, 3*s, dark);
+
+    const eye = g.phase === 'attack' ? C.danger : isElite ? '#ffe08a' : '#ffd6e7';
+    px(x - 3*s, y - 2*s, 2*s, 2*s, eye);
+    px(x + 1*s, y - 2*s, 2*s, 2*s, eye);
+    px(x - 2*s, y - 1*s, 1*s, 1*s, '#1a0a24');
+    px(x + 2*s, y - 1*s, 1*s, 1*s, '#1a0a24');
+    if (g.phase === 'attack') px(x - 2*s, y + 2*s, 4*s, 2*s, '#3a1020');
+    else px(x - 1*s, y + 2*s, 2*s, 1*s, dark);
+
+    // shield bar
+    if (g.shield > 0) {
+      px(x - 6, y - 10, 12, 2, '#203040');
+      px(x - 6, y - 10, Math.min(12, Math.floor(12 * g.shield / Math.max(1, 40 + state.wave * 4))), 2, '#9ad0ff');
+    }
+
+    const bw = isBoss ? 24 : isElite ? 16 : 12;
+    const hy = y - (isBoss ? 16 : isElite ? 12 : 9);
+    px(x - Math.floor(bw/2), hy, bw, 3, '#000');
+    const ratio = Math.max(0, g.hp / g.maxHp);
+    const hc = isBoss ? '#c4a0ff' : isElite ? '#e8a040' : C.danger;
+    px(x - Math.floor(bw/2), hy, Math.floor(bw * ratio), 3, hc);
+    if (isBoss || isElite) {
+      ctx.fillStyle = hc;
+      ctx.font = '6px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(g.label, x, hy - 2);
+      ctx.textAlign = 'left';
+    }
+    ctx.restore();
+  }
+
+  function drawParticles() {
+    for (const p of state.particles) {
+      const a = Math.max(0, p.life / p.max);
+      ctx.globalAlpha = a;
+      px(p.x, p.y, p.size, p.kind === 'coin' ? 1 : p.size, p.color);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawFloaters() {
+    ctx.font = 'bold 7px monospace';
+    for (const f of state.floaters) {
+      ctx.globalAlpha = Math.min(1, f.t / 0.3);
+      ctx.fillStyle = f.color;
+      ctx.fillText(f.text, Math.round(f.x), Math.round(f.y));
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawHudPixel() {
+    const dd = diffDefs[save.difficulty] || diffDefs.normal;
+    const t = Math.min(1, state.nightT / dd.night);
+    const bx = room.x + 4, by = H - 8, bw = room.w - 8;
+    // progress bar frame
+    px(bx - 1, by - 1, bw + 2, 6, '#000');
+    px(bx, by, bw, 4, '#121a22');
+    const fillW = Math.floor(bw * t);
+    const barC = t > 0.85 ? C.danger : t > 0.5 ? C.gold : C.neon;
+    px(bx, by, fillW, 4, barC);
+    px(bx, by, fillW, 1, t > 0.85 ? '#ff8a9a' : t > 0.5 ? '#ffe08a' : '#7dffb8');
+    // hour ticks
+    for (let i = 1; i < 8; i++) {
+      px(bx + Math.floor(bw * i / 8), by, 1, 4, 'rgba(0,0,0,.35)');
+    }
+    ctx.fillStyle = C.muted;
+    ctx.font = '6px monospace';
+    ctx.fillText(clockLabel(), bx, by - 2);
+    if (state.paused && state.phase === 'playing') {
+      ctx.fillStyle = 'rgba(0,0,0,.55)';
+      ctx.fillRect(0, 0, W, H);
+      // pause panel
+      px(W/2 - 20, H/2 - 8, 40, 14, '#121820');
+      px(W/2 - 20, H/2 - 8, 40, 1, C.neon);
+      px(W/2 - 20, H/2 + 5, 40, 1, '#0a3d24');
+      ctx.fillStyle = C.neon;
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('PAUSED', W/2, H/2 + 2);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function fit() {
+    const wrap = canvas.parentElement;
+    if (!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    const pad = 4;
+    const availW = Math.max(240, rect.width - pad * 2);
+    const availH = Math.max(135, rect.height - pad * 2);
+    // logical 320x180 → display size; buffer is 3x for crisp pixels
+    let scale = Math.min(availW / W, availH / H);
+    // prefer integer display scale when close (less shimmer)
+    const nearest = Math.max(1, Math.round(scale));
+    if (Math.abs(scale - nearest) < 0.35) scale = nearest;
+    const dw = Math.round(W * scale);
+    const dh = Math.round(H * scale);
+    canvas.style.width = dw + 'px';
+    canvas.style.height = dh + 'px';
+    canvas.style.left = Math.round((rect.width - dw) / 2) + 'px';
+    canvas.style.top = Math.round((rect.height - dh) / 2) + 'px';
+  }
+  window.addEventListener('resize', fit);
+
+  // boot
+  resetCells();
+  renderHome();
+  showScreen('home');
+  fit();
+  updateUI();
+
+  let last = performance.now();
+  function loop(now) {
+    const dt0 = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (ui.screenGame.classList.contains('show')) {
+      const steps = state.speed === 2 ? 2 : 1;
+      for (let i = 0; i < steps; i++) update(dt0);
+      draw();
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // re-fit when entering game + after layout settles
+  const _origShowScreen = showScreen;
+  // hook via play button already calls showScreen; also observe stage
+  const stageEl = document.querySelector('.stage-wrap');
+  if (window.ResizeObserver && stageEl) {
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(stageEl);
+  }
+  setInterval(() => { if (ui.screenGame.classList.contains('show')) fit(); }, 250);
+})();
+</script>
+<style>
+  .hub-back {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 9999;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(232, 236, 244, 0.18);
+    background: rgba(10, 14, 23, 0.78);
+    color: #E8ECF4;
+    font: 600 12px/1.2 "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+    opacity: 0.55;
+    transition: opacity 0.15s ease;
+  }
+  .hub-back:hover, .hub-back:focus-visible {
+    opacity: 1;
+    outline: 2px solid #3DE7C7;
+    outline-offset: 2px;
+  }
+</style>
+</body>
+</html>

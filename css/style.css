@@ -189,8 +189,12 @@ a {
   color: var(--teal);
 }
 
-.game-card:first-child .play {
+.game-card[data-accent="rose"] .play {
   color: var(--rose);
+}
+
+.game-card[data-accent="amber"] .play {
+  color: #B45309;
 }
 
 /* footer */

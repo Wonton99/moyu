@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="摸鱼小游戏合集 — 死灵召唤师、数独增量，即点即玩。" />
+  <meta name="description" content="摸鱼小游戏合集 — 死灵召唤师、数独增量、宿舍夜班，即点即玩。" />
   <meta property="og:title" content="摸鱼 · 小游戏合集" />
-  <meta property="og:description" content="死灵召唤师 · 数独增量 — 浏览器里开箱即玩" />
+  <meta property="og:description" content="死灵召唤师 · 数独增量 · 宿舍夜班 — 浏览器里开箱即玩" />
   <meta property="og:type" content="website" />
   <title>摸鱼 · 小游戏合集</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
@@ -17,7 +17,7 @@
       <span class="brand-mark" aria-hidden="true">摸</span>
       <span class="brand-name">摸鱼</span>
     </a>
-    <span class="online">2 款游戏</span>
+    <span class="online">3 款游戏</span>
   </header>
 
   <main>
@@ -27,7 +27,7 @@
     </section>
 
     <section class="games" aria-label="游戏列表">
-      <article class="game-card">
+      <article class="game-card" data-accent="rose">
         <a class="card-link" href="games/necromancer/" aria-label="开始游玩 死灵召唤师"></a>
         <div class="card-art art-necro" aria-hidden="true">
           <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg">
@@ -51,6 +51,46 @@
             <span class="ver">v0.5.9</span>
           </div>
           <p>动作 Roguelike · 召唤亡灵清层</p>
+          <span class="play">开始游戏 →</span>
+        </div>
+      </article>
+
+      <article class="game-card" data-accent="amber">
+        <a class="card-link" href="games/dorm-night/" aria-label="开始游玩 宿舍夜班"></a>
+        <div class="card-art art-dorm" aria-hidden="true">
+          <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg">
+            <rect width="480" height="270" fill="#141B24"/>
+            <rect x="0" y="0" width="480" height="270" fill="url(#gD)"/>
+            <defs>
+              <linearGradient id="gD" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1a2834"/>
+                <stop offset="100%" stop-color="#0b0e14"/>
+              </linearGradient>
+            </defs>
+            <!-- pixel corridor -->
+            <rect x="40" y="60" width="400" height="150" fill="#121820" stroke="#2a3a4c" stroke-width="2"/>
+            <rect x="40" y="200" width="400" height="10" fill="#0a0d12"/>
+            <!-- doors -->
+            <rect x="70" y="90" width="50" height="80" fill="#0e141c" stroke="#3dff9a" stroke-width="2"/>
+            <rect x="150" y="90" width="50" height="80" fill="#0e141c" stroke="#f0c14b" stroke-width="2"/>
+            <rect x="230" y="90" width="50" height="80" fill="#0e141c" stroke="#6ecbff" stroke-width="2"/>
+            <rect x="310" y="90" width="50" height="80" fill="#0e141c" stroke="#b894ff" stroke-width="2"/>
+            <!-- bed -->
+            <rect x="380" y="140" width="40" height="40" fill="#182028" stroke="#3dff9a" stroke-width="1.5"/>
+            <rect x="386" y="150" width="28" height="12" fill="#1a8f55"/>
+            <!-- turret -->
+            <rect x="120" y="70" width="14" height="18" fill="#ffb347"/>
+            <rect x="124" y="58" width="6" height="14" fill="#f0c14b"/>
+            <!-- scanlines hint -->
+            <text x="24" y="40" fill="#3dff9a" font-size="12" font-family="Consolas, monospace" opacity="0.75">PIXEL NIGHT</text>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top">
+            <h2>宿舍夜班</h2>
+            <span class="ver">PIXEL</span>
+          </div>
+          <p>像素塔防 · 躺床攒钱，造炮守门</p>
           <span class="play">开始游戏 →</span>
         </div>
       </article>
@@ -89,6 +129,8 @@
     <span>摸鱼</span>
     <span class="sep">·</span>
     <a href="games/necromancer/">死灵召唤师</a>
+    <span class="sep">·</span>
+    <a href="games/dorm-night/">宿舍夜班</a>
     <span class="sep">·</span>
     <a href="games/sudoku/">数独增量</a>
   </footer>
