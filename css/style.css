@@ -101,16 +101,14 @@ a {
   white-space: nowrap;
 }
 
-.visit-foot {
-  font-variant-numeric: tabular-nums;
+.visit-chip[data-source="local"] {
+  color: var(--muted);
+  background: #F3F4F6;
+  border-color: var(--line);
 }
 
-.visitor-badge {
-  display: inline-block;
-  vertical-align: middle;
-  height: 20px;
-  width: auto;
-  opacity: 0.92;
+.visit-foot {
+  font-variant-numeric: tabular-nums;
 }
 
 /* intro */

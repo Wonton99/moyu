@@ -1,6 +1,14 @@
-/* 摸鱼合集首页 · 今日访问量（本机日计数 + 累计徽章兼容） */
+/* 摸鱼合集首页 · 访问量
+ * 全站：Abacus 免费计数（CORS *）
+ *   今日 PV  key: Wonton99/moyu-hub-YYYY-MM-DD
+ *   累计 PV  key: Wonton99/moyu-hub-total
+ * 本机：localStorage（离线/接口失败时回退显示）
+ */
 (function () {
-  const KEY = 'moyu_hub_visits_v1';
+  const NS = 'Wonton99';
+  const PREFIX = 'moyu-hub';
+  const LOCAL_KEY = 'moyu_hub_visits_v2';
+  const API = 'https://abacus.jasoncameron.dev';
 
   function pad(n) {
     return String(n).padStart(2, '0');
@@ -11,9 +19,13 @@
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
 
-  function load() {
+  function dayCounterId() {
+    return PREFIX + '-' + todayKey();
+  }
+
+  function loadLocal() {
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(LOCAL_KEY);
       if (!raw) return null;
       const data = JSON.parse(raw);
       return data && typeof data === 'object' ? data : null;
@@ -22,42 +34,87 @@
     }
   }
 
-  function save(data) {
+  function saveLocal(data) {
     try {
-      localStorage.setItem(KEY, JSON.stringify(data));
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
     } catch (_) {}
   }
 
-  function bumpToday() {
+  function bumpLocal() {
     const t = todayKey();
-    const prev = load() || { date: t, today: 0, total: 0 };
+    const prev = loadLocal() || { date: t, today: 0, total: 0 };
     if (prev.date !== t) {
       prev.date = t;
       prev.today = 0;
     }
     prev.today = (prev.today || 0) + 1;
     prev.total = (prev.total || 0) + 1;
-    save(prev);
+    saveLocal(prev);
     return prev;
   }
 
-  function render() {
+  function hit(id) {
+    return fetch(API + '/hit/' + NS + '/' + id, { method: 'GET', mode: 'cors' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('abacus ' + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j || typeof j.value !== 'number') throw new Error('abacus bad body');
+        return j.value;
+      });
+  }
+
+  function render(local, globalToday, globalTotal) {
     const el = document.getElementById('visitToday');
-    const data = bumpToday();
-    if (el) {
-      el.textContent = '今日访问 ' + data.today;
-      el.title = '本设备今日打开次数 · 本地统计（换设备/清缓存会重新计）';
-    }
     const totalEl = document.getElementById('visitLocalTotal');
+    const usingGlobal = typeof globalToday === 'number';
+
+    if (el) {
+      if (usingGlobal) {
+        el.textContent = '今日访问 ' + globalToday;
+        el.title = '全站今日访问量（PV，按日统计）';
+        el.dataset.source = 'global';
+      } else {
+        el.textContent = '今日访问 ' + local.today;
+        el.title = '今日访问量（本机统计 · 全站计数暂不可用）';
+        el.dataset.source = 'local';
+      }
+    }
+
     if (totalEl) {
-      totalEl.textContent = '本机累计 ' + (data.total || 0);
-      totalEl.title = '本设备累计打开次数';
+      if (typeof globalTotal === 'number') {
+        totalEl.textContent = '累计访问 ' + globalTotal;
+        totalEl.title = '全站累计访问量（PV）';
+        totalEl.dataset.source = 'global';
+      } else {
+        totalEl.textContent = '本机累计 ' + local.total;
+        totalEl.title = '本设备累计打开次数';
+        totalEl.dataset.source = 'local';
+      }
     }
   }
 
+  function run() {
+    const local = bumpLocal();
+    // 先用本机数占位，避免接口慢时空白
+    render(local, null, null);
+
+    var todayP = hit(dayCounterId());
+    var totalP = hit(PREFIX + '-total');
+
+    Promise.all([todayP, totalP])
+      .then(function (vals) {
+        render(local, vals[0], vals[1]);
+      })
+      .catch(function () {
+        // keep local fallback already rendered
+      });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', render);
+    document.addEventListener('DOMContentLoaded', run);
   } else {
-    render();
+    run();
   }
 })();
