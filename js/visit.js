@@ -1,14 +1,17 @@
 /* 摸鱼合集首页 · 访问量
- * 全站今日 PV：Abacus  key Wonton99/moyu-hub-YYYY-MM-DD
- * 全站累计 PV/UV：不蒜子 busuanzi（国内可达性更好）
- * 本机：localStorage，仅在全站接口失败时作为回退展示
+ * 今日 / 累计 均来自同一计数服务（Abacus），保证同源可比：
+ *   今日 PV  key: Wonton99/moyu-hub-YYYY-MM-DD
+ *   累计 PV  key: Wonton99/moyu-hub-total
+ *   每次打开首页会同时 +1 两个计数器
+ * 不蒜子仅作「访客 UV」补充，不再当作累计 PV
+ * 接口失败时明确回退为「本机」
  */
 (function () {
   var NS = 'Wonton99';
   var PREFIX = 'moyu-hub';
   var LOCAL_KEY = 'moyu_hub_visits_v2';
   var API = 'https://abacus.jasoncameron.dev';
-  var SCRIPT_VER = 'pv2';
+  var SCRIPT_VER = 'pv3';
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -18,6 +21,7 @@
   }
 
   function dayCounterId() { return PREFIX + '-' + todayKey(); }
+  function totalCounterId() { return PREFIX + '-total'; }
 
   function loadLocal() {
     try {
@@ -65,12 +69,8 @@
     return new Promise(function (resolve) {
       var t0 = Date.now();
       function check() {
-        var pv = parseNum((document.getElementById('busuanzi_value_site_pv') || {}).textContent);
         var uv = parseNum((document.getElementById('busuanzi_value_site_uv') || {}).textContent);
-        if (pv != null && pv > 0) {
-          resolve({ site_pv: pv, site_uv: uv });
-          return;
-        }
+        if (uv != null && uv > 0) { resolve({ site_uv: uv }); return; }
         if (Date.now() - t0 > timeoutMs) { resolve(null); return; }
         setTimeout(check, 200);
       }
@@ -78,18 +78,12 @@
     });
   }
 
-  function setChip(el, text, source, title) {
-    if (!el) return;
-    el.textContent = text;
-    el.dataset.source = source;
-    el.title = title;
-  }
-
-  function setFoot(el, text, source, title) {
-    if (!el) return;
-    el.textContent = text;
-    el.dataset.source = source;
-    el.title = title;
+  /** 累计不应小于今日：历史数据不同步时用 max 对齐 */
+  function alignTotal(today, total) {
+    if (typeof today === 'number' && typeof total === 'number') return Math.max(today, total);
+    if (typeof total === 'number') return total;
+    if (typeof today === 'number') return today;
+    return null;
   }
 
   function renderAll(state) {
@@ -97,31 +91,29 @@
     var foot = document.getElementById('visitLocalTotal');
     var local = state.local || { today: 0, total: 0 };
     var today = state.globalToday;
-    var sitePv = state.sitePv;
-    var siteUv = state.siteUv;
+    var total = alignTotal(state.globalToday, state.globalTotal);
+    var uv = state.siteUv;
 
-    // top chip: prefer global daily
     if (typeof today === 'number') {
-      setChip(chip, '全站今日 ' + today, 'global',
-        '全站今日访问量 PV（按日重置）· 计数服务 Abacus');
-    } else if (sitePv != null) {
-      // no daily backend, but we have global total — still not local
-      setChip(chip, '本机今日 ' + local.today + ' · 全站累计 ' + sitePv, 'mixed',
-        '今日接口暂不可用，前半为本机；累计为全站（不蒜子）');
+      chip.textContent = '今日访问 ' + today;
+      chip.dataset.source = 'global';
+      chip.title = '全站今日 PV（Abacus，按日重置）';
     } else {
-      setChip(chip, '本机今日 ' + local.today, 'local',
-        '全站计数暂不可用 · 当前为本机统计');
+      chip.textContent = '本机今日 ' + local.today;
+      chip.dataset.source = 'local';
+      chip.title = '全站今日计数暂不可用 · 当前为本机';
     }
 
-    // footer total: busuanzi site_pv > abacus total > local
-    var totalVal = sitePv != null ? sitePv : state.globalTotal;
-    var totalSrc = sitePv != null ? 'global' : (typeof state.globalTotal === 'number' ? 'global' : 'local');
-    if (totalVal != null) {
-      var suffix = siteUv != null ? ' · UV ' + siteUv : '';
-      setFoot(foot, '累计访问 ' + totalVal + suffix, totalSrc,
-        totalSrc === 'global' ? '全站累计访问量 PV' + (siteUv != null ? ' / 独立访客 UV' : '') : '本机累计');
+    if (typeof total === 'number') {
+      var text = '累计访问 ' + total;
+      if (uv != null) text += ' · 访客 ' + uv;
+      foot.textContent = text;
+      foot.dataset.source = 'global';
+      foot.title = '全站累计 PV（与今日同源 Abacus）' + (uv != null ? ' · UV 来自不蒜子' : '');
     } else {
-      setFoot(foot, '本机累计 ' + local.total, 'local', '本设备累计打开次数');
+      foot.textContent = '本机累计 ' + local.total;
+      foot.dataset.source = 'local';
+      foot.title = '本设备累计打开次数';
     }
   }
 
@@ -140,45 +132,40 @@
       local: local,
       globalToday: null,
       globalTotal: null,
-      sitePv: null,
       siteUv: null,
     };
     renderAll(state);
     ensureBusuanziScript();
 
-    var todayP = hit(dayCounterId()).then(function (v) {
+    // 同源：每次访问同时 +1 今日与累计
+    var dayP = hit(dayCounterId()).then(function (v) {
       state.globalToday = v;
       renderAll(state);
       return v;
     }).catch(function () { return null; });
 
-    var totalP = hit(PREFIX + '-total').then(function (v) {
+    var totalP = hit(totalCounterId()).then(function (v) {
       state.globalTotal = v;
       renderAll(state);
       return v;
     }).catch(function () { return null; });
 
-    var busP = waitForBusuanzi(4000).then(function (b) {
-      if (b) {
-        state.sitePv = b.site_pv;
-        state.siteUv = b.site_uv;
-      }
+    var busP = waitForBusuanzi(3500).then(function (b) {
+      if (b) state.siteUv = b.site_uv;
       renderAll(state);
       return b;
     });
 
-    Promise.all([todayP, totalP, busP]).then(function () {
-      renderAll(state);
-    });
+    Promise.all([dayP, totalP, busP]).then(function () { renderAll(state); });
   }
 
-  // expose for debugging on live site
   window.__moyuVisitDebug = function () {
     return {
-      local: loadLocal(),
-      api: API,
-      dayId: dayCounterId(),
       ver: SCRIPT_VER,
+      dayId: dayCounterId(),
+      totalId: totalCounterId(),
+      api: API,
+      local: loadLocal(),
     };
   };
 
