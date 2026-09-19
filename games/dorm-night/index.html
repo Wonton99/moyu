@@ -211,6 +211,38 @@
   .cl-block li { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 2px; }
   .cl-block li b { color: var(--ink); }
 
+  /* hex augment cards */
+  .aug-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 560px) { .aug-grid { grid-template-columns: 1fr; } }
+  .aug-card {
+    border: 2px solid var(--line-deep); background: var(--panel2);
+    padding: 14px 12px; cursor: pointer; text-align: left;
+    color: var(--ink); font-family: var(--font);
+    box-shadow: 3px 3px 0 #000; min-height: 150px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .aug-card:hover { border-color: var(--neon); transform: translate(-1px,-1px); }
+  .aug-card.rare { border-color: var(--soul); background: #16122a; }
+  .aug-card.epic { border-color: var(--gold); background: #1c1608; }
+  .aug-card.legendary {
+    border-color: #ff6b9d; background: linear-gradient(180deg, #2a1030, #120818);
+    box-shadow: 3px 3px 0 #000, 0 0 16px rgba(255,107,157,.25);
+  }
+  .aug-card.legendary .tag { color: #ff6b9d; }
+  .aug-card.legendary h3 { color: #ff8fb3; }
+  .aug-card .tag { font-size: 10px; letter-spacing: 2px; color: var(--muted); }
+  .aug-card.rare .tag { color: var(--soul); }
+  .aug-card.epic .tag { color: var(--gold); }
+  .aug-card h3 { font-size: 15px; color: var(--neon); letter-spacing: 1px; }
+  .aug-card.rare h3 { color: var(--soul); }
+  .aug-card.epic h3 { color: var(--gold); }
+  .aug-card p { font-size: 12px; color: var(--muted); line-height: 1.55; flex: 1; }
+  .aug-owned {
+    margin-top: 10px; font-size: 11px; color: var(--muted);
+    border-top: 1px solid var(--line-deep); padding-top: 8px;
+  }
+  .aug-owned b { color: var(--gold); }
+
   .diff-row { display: flex; gap: 6px; width: 100%; max-width: 300px; }
   .diff-btn {
     flex: 1; appearance: none; border: 2px solid var(--line-deep); background: var(--panel);
@@ -579,6 +611,22 @@
       </div>
     </div>
   </section>
+
+  <!-- HEX AUGMENT PICK -->
+  <div class="modal" id="modal-aug">
+    <div class="modal-card" style="width:min(720px,100%);max-height:min(90vh,700px)">
+      <div class="modal-head">
+        <div>
+          <h2>海克斯值班协议</h2>
+          <div class="hint">从 3 张效果卡中选择 1 张 · 本局永久生效 · 时间已暂停</div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="aug-grid" id="aug-grid"></div>
+        <div class="aug-owned" id="aug-owned"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- DICTIONARY -->
   <div class="modal" id="modal-dict">
@@ -952,8 +1000,18 @@
   }
 
   // ---------- Version / Dictionary / Changelog ----------
-  const GAME_VERSION = 'v0.9.3';
+  const GAME_VERSION = 'v0.10.0';
   const VERSION_NOTES = [
+    {
+      ver: 'v0.10.0',
+      date: '海克斯协议',
+      items: [
+        '新增随机效果卡：开局与每过一夜后三选一',
+        '品质：普通/稀有/史诗/**传说（质变）**',
+        '传说卡改写规则：穿甲、反伤、床炮、亡语、丧钟、锁血、杀怪回门、复制核心、黄金律、寒霜纪元',
+        '选卡时暂停；已选卡可在日志/词典查看',
+      ],
+    },
     {
       ver: 'v0.9.3',
       date: '最近',
@@ -1020,7 +1078,195 @@
     { cat: '系统', name: 'AI 队友', desc: '301/303/305 三位邻居。他们会自动输出并承担部分伤害；全灭或失守会影响局势。' },
     { cat: '系统', name: '局外装备', desc: '用残魂升级：开局金、门上限、床收入、伤害、攻速、开局送塔等。' },
     { cat: '系统', name: '成就', desc: '过夜、击杀 Boss、困难通关、累计残魂等条件达成后点亮。' },
+    { cat: '海克斯', name: '效果卡', desc: '类似海克斯大乱斗：开局与每过一夜后，从 3 张随机卡中选 1 张，本局永久生效。选卡时游戏暂停。' },
+    { cat: '海克斯', name: '品质', desc: '普通（白）/ 稀有（紫）/ 史诗（金）/ 传说（虹）。传说会改写规则，不只是加数值。' },
+    { cat: '海克斯', name: '厄运契约', desc: '高风险卡示例：收入大涨但门上限降低。适合维修/火力流。' },
+    { cat: '海克斯', name: '传说 · 质变卡', desc: '穿甲弹幕、门之反噬、床铺武装、亡语爆破、午夜丧钟、绝境屏障、灵魂榨取、复制核心、黄金律、寒霜纪元等，会改变战斗逻辑。' },
   ];
+
+  // ---------- Hextech-style augments ----------
+  const AUG_POOL = [
+    { id: 'edge', name: '锋利符文', rarity: 'common', desc: '全塔伤害 +20%',
+      apply: (m) => { m.dmgMul *= 1.2; } },
+    { id: 'haste', name: '快速装填', rarity: 'common', desc: '全塔攻速 +15%（冷却更低）',
+      apply: (m) => { m.cdMul *= 0.85; } },
+    { id: 'sheet', name: '黄金床单', rarity: 'common', desc: '床位收入 +25%',
+      apply: (m) => { m.bedMul *= 1.25; } },
+    { id: 'plate', name: '加固铁皮', rarity: 'common', desc: '门上限 +25%',
+      apply: (m) => { m.doorMul *= 1.25; } },
+    { id: 'kit', name: '急救包', rarity: 'common', desc: '立即回满门血，本局维修效率 +40%',
+      instant: () => { state.doorHp = doorMax(state.doorLv); },
+      apply: (m) => { m.repairMul *= 1.4; } },
+    { id: 'cash', name: '天降横财', rarity: 'common', desc: '立即获得 100 金币', once: true,
+      instant: () => { state.gold += 100; } },
+    { id: 'gift', name: '符箭补给', rarity: 'common', desc: '立刻在空位放入 2 座符箭塔', once: true,
+      instant: () => {
+        let n = 0;
+        for (let y = 0; y < GRID.rows && n < 2; y++)
+          for (let x = GRID.cols - 1; x >= 0 && n < 2; x--)
+            if (!cells[y][x]) {
+              occupy({ type: 'arrow', lv: 1, gx: x, gy: y, w: 1, h: 1, cd: 0, recoil: 0, charge: 0, aim: 0, flash: 0.4 });
+              n++;
+            }
+      } },
+    { id: 'radar', name: '雷达锁定', rarity: 'rare', desc: '全塔射程 +18%',
+      apply: (m) => { m.rangeMul *= 1.18; } },
+    { id: 'frostbite', name: '寒霜附魔', rarity: 'rare', desc: '所有攻击额外轻微减速',
+      apply: (m) => { m.slowBonus = Math.max(m.slowBonus, 0.2); } },
+    { id: 'venom', name: '毒雾弥漫', rarity: 'rare', desc: '所有攻击附加中毒',
+      apply: (m) => { m.poisonBonus = Math.max(m.poisonBonus, 2); } },
+    { id: 'chain', name: '连锁过载', rarity: 'rare', desc: '雷珠弹射 +1',
+      apply: (m) => { m.chainBonus += 1; } },
+    { id: 'echo', name: '镇魂共鸣', rarity: 'rare', desc: '镇魂炮/火盆伤害 +40%',
+      apply: (m) => { m.heavyMul *= 1.4; } },
+    { id: 'regen', name: '不屈门闩', rarity: 'rare', desc: '门被动回复 +100%',
+      apply: (m) => { m.regenMul *= 2; } },
+    { id: 'greed', name: '贪婪回收', rarity: 'rare', desc: '出售建筑返还 85%（原 60%）',
+      apply: (m) => { m.sellMul = 0.85; } },
+    { id: 'lucky', name: '值班津贴', rarity: 'rare', desc: '过夜奖金 +40%',
+      apply: (m) => { m.nightGoldMul *= 1.4; } },
+    { id: 'pact', name: '厄运契约', rarity: 'epic', desc: '收入 +60%，但门上限 -20%',
+      apply: (m) => { m.bedMul *= 1.6; m.doorMul *= 0.8; } },
+    { id: 'frenzy', name: '狂热时刻', rarity: 'epic', desc: '攻速 +35%，门上限 -15%',
+      apply: (m) => { m.cdMul *= 0.65; m.doorMul *= 0.85; } },
+    { id: 'storm', name: '雷霆之夜', rarity: 'epic', desc: '全塔伤害 +35%，怪物速度 +12%',
+      apply: (m) => { m.dmgMul *= 1.35; m.enemySpeedMul *= 1.12; } },
+
+    // ===== 传说 · 规则质变 =====
+    { id: 'pierce', name: '穿甲弹幕', rarity: 'legendary',
+      desc: '【质变】所有弹道穿透：命中的目标会波及射程内其他敌人',
+      apply: (m) => { m.pierce = true; } },
+    { id: 'thorns', name: '门之反噬', rarity: 'legendary',
+      desc: '【质变】怪物攻击门时，自身受到反伤（按其伤害）',
+      apply: (m) => { m.thorns = 1.0; } },
+    { id: 'bedgun', name: '床铺武装', rarity: 'legendary',
+      desc: '【质变】床位不再只是产钱：每 2.5 秒对门口区域轰击一次',
+      apply: (m) => { m.bedGun = true; } },
+    { id: 'onkill', name: '亡语爆破', rarity: 'legendary',
+      desc: '【质变】怪物死亡时爆炸，对周围敌人造成伤害',
+      apply: (m) => { m.onKillBoom = 18; } },
+    { id: 'bell', name: '午夜丧钟', rarity: 'legendary',
+      desc: '【质变】每 4 秒全图雷击，对所有敌人造成伤害',
+      apply: (m) => { m.bell = 14; } },
+    { id: 'laststand', name: '绝境屏障', rarity: 'legendary',
+      desc: '【质变】每夜一次：门将被击破时锁血 1 点，并获得 3 秒无敌',
+      apply: (m) => { m.lastStand = true; } },
+    { id: 'lifesteal', name: '灵魂榨取', rarity: 'legendary',
+      desc: '【质变】击杀怪物回复门血',
+      apply: (m) => { m.lifeDoor = 4; } },
+    { id: 'copy', name: '复制核心', rarity: 'legendary',
+      desc: '【质变】立刻复制你最贵的一座建筑（同等级，放最近空位）',
+      instant: () => {
+        const list = allPlaced().filter(it => towerDefs[it.type]);
+        if (!list.length) return;
+        list.sort((a, b) => (towerDefs[b.type].cost * b.lv) - (towerDefs[a.type].cost * a.lv));
+        const src = list[0];
+        const def = towerDefs[src.type];
+        outer:
+        for (let y = 0; y < GRID.rows; y++) {
+          for (let x = 0; x < GRID.cols; x++) {
+            if (canPlace(x, y, def.w, def.h)) {
+              occupy({
+                type: src.type, lv: src.lv,
+                gx: x, gy: y, w: def.w, h: def.h,
+                cd: 0, recoil: 0, charge: 0, aim: 0, flash: 0.6,
+              });
+              break outer;
+            }
+          }
+        }
+      } },
+    { id: 'goldrule', name: '黄金律', rarity: 'legendary',
+      desc: '【质变】门损血越多，产钱越快（最多 +100%）；满血时无加成',
+      apply: (m) => { m.goldOnMissingHp = true; } },
+    { id: 'frostage', name: '寒霜纪元', rarity: 'legendary',
+      desc: '【质变】全场怪物永久大幅减速',
+      apply: (m) => { m.enemySpeedMul *= 0.55; m.slowBonus = Math.max(m.slowBonus, 0.25); } },
+  ];
+  const RARITY_LABEL = { common: '普通', rare: '稀有', epic: '史诗', legendary: '传说' };
+
+  function augMods() {
+    const m = {
+      dmgMul: 1, cdMul: 1, bedMul: 1, doorMul: 1, repairMul: 1,
+      rangeMul: 1, slowBonus: 0, poisonBonus: 0, chainBonus: 0,
+      heavyMul: 1, regenMul: 1, sellMul: 0.6, nightGoldMul: 1,
+      enemySpeedMul: 1,
+      pierce: false, thorns: 0, bedGun: false, onKillBoom: 0,
+      bell: 0, lastStand: false, lifeDoor: 0, goldOnMissingHp: false,
+    };
+    for (const id of (state.augments || [])) {
+      const def = AUG_POOL.find(a => a.id === id);
+      if (def && def.apply) def.apply(m);
+    }
+    return m;
+  }
+
+  function pickAugmentChoices() {
+    const owned = new Set(state.augments || []);
+    const pool = AUG_POOL.filter(a => a.once || !owned.has(a.id));
+    const weighted = [];
+    for (const a of pool) {
+      const w = a.rarity === 'legendary' ? 1 : a.rarity === 'epic' ? 2 : a.rarity === 'rare' ? 2 : 4;
+      for (let i = 0; i < w; i++) weighted.push(a);
+    }
+    const picks = [];
+    const used = new Set();
+    let guard = 0;
+    while (picks.length < 3 && weighted.length && guard++ < 80) {
+      const i = (Math.random() * weighted.length) | 0;
+      const a = weighted[i];
+      if (!used.has(a.id)) { used.add(a.id); picks.push(a); }
+      weighted.splice(i, 1);
+    }
+    return picks;
+  }
+
+  function showAugmentPick() {
+    state.augPickOpen = true;
+    state.paused = true;
+    const grid = document.getElementById('aug-grid');
+    const ownedEl = document.getElementById('aug-owned');
+    const modal = document.getElementById('modal-aug');
+    if (!grid || !modal) { state.augPickOpen = false; return; }
+    const choices = pickAugmentChoices();
+    if (!choices.length) { state.augPickOpen = false; state.paused = false; return; }
+    grid.innerHTML = choices.map((a, i) => `
+      <button type="button" class="aug-card ${a.rarity}" data-aug="${a.id}">
+        <div class="tag">${RARITY_LABEL[a.rarity] || '普通'} · ${i + 1}</div>
+        <h3>${a.name}</h3>
+        <p>${a.desc}</p>
+      </button>
+    `).join('');
+    if (ownedEl) {
+      const owned = state.augments || [];
+      ownedEl.innerHTML = owned.length
+        ? `本局已选：<b>${owned.map(id => (AUG_POOL.find(a => a.id === id) || { name: id }).name).join('、')}</b>`
+        : '本局尚未选择效果卡';
+    }
+    grid.querySelectorAll('[data-aug]').forEach(btn => {
+      btn.onclick = () => applyAugment(btn.dataset.aug);
+    });
+    modal.classList.add('show');
+  }
+
+  function applyAugment(id) {
+    const def = AUG_POOL.find(a => a.id === id);
+    if (!def) return;
+    if (!state.augments) state.augments = [];
+    if (def.instant) { try { def.instant(); } catch (_) {} }
+    if (!def.once) {
+      if (!state.augments.includes(id)) state.augments.push(id);
+    }
+    const modal = document.getElementById('modal-aug');
+    if (modal) modal.classList.remove('show');
+    state.augPickOpen = false;
+    log(`海克斯：${def.name} — ${def.desc}`, 'soulc');
+    beep(720, 0.1, 'square', 0.04);
+    if (state.phase === 'playing' && !(ui.overlay && ui.overlay.classList.contains('show'))) {
+      state.paused = false;
+      if (ui.btnPause) ui.btnPause.textContent = '暂停';
+    }
+  }
 
   let dictCat = '基础';
   function renderDict() {
@@ -1397,29 +1643,40 @@
   };
   const sizeLabel = t => `${towerDefs[t].w}×${towerDefs[t].h}`;
 
-  const bedIncomeBase = lv => (6 + (lv - 1) * 5 + metaBonus().bedBonus) * metaBonus().bedMul * ((state.roomMul && state.roomMul.bed) || 1);
+  const bedIncomeBase = lv => {
+    let v = (6 + (lv - 1) * 5 + metaBonus().bedBonus) * metaBonus().bedMul * ((state.roomMul && state.roomMul.bed) || 1) * augMods().bedMul;
+    if (augMods().goldOnMissingHp) {
+      const max = doorMax(state.doorLv) || 1;
+      const missing = Math.max(0, max - state.doorHp) / max;
+      v *= 1 + missing; // up to +100%
+    }
+    return v;
+  };
   const bedCost = lv => Math.floor(80 * Math.pow(1.55, lv - 1));
-  const doorMax = lv => Math.floor((80 + (lv - 1) * 55 + metaBonus().doorBonus) * metaBonus().doorMul * ((state.roomMul && state.roomMul.door) || 1));
+  const doorMax = lv => Math.floor((80 + (lv - 1) * 55 + metaBonus().doorBonus) * metaBonus().doorMul * ((state.roomMul && state.roomMul.door) || 1) * augMods().doorMul);
   const doorCost = lv => Math.floor(60 * Math.pow(1.5, lv - 1));
-  const doorRegen = lv => (0.35 + (lv - 1) * 0.3) * metaBonus().regenMul;
+  const doorRegen = lv => (0.35 + (lv - 1) * 0.3) * metaBonus().regenMul * augMods().regenMul;
   const towerUpCost = (type, lv) => Math.floor(towerDefs[type].cost * (0.9 + lv * 0.85));
   const towerSellValue = (type, lv) => {
     let spent = towerDefs[type].cost;
     for (let i = 1; i < lv; i++) spent += towerUpCost(type, i);
-    return Math.floor(spent * 0.6);
+    return Math.floor(spent * augMods().sellMul);
   };
   function towerStats(type, lv) {
     const d = towerDefs[type];
     const mb = metaBonus();
-    if (type === 'repair') return { heal: (2.5 + (lv - 1) * 2.2) * mb.repairMul };
+    const am = augMods();
+    if (type === 'repair') return { heal: (2.5 + (lv - 1) * 2.2) * mb.repairMul * am.repairMul };
     if (type === 'idol') return { boost: 0.25 * lv };
+    let dmg = d.dmg * (1 + (lv - 1) * 0.55) * mb.dmgMul * am.dmgMul;
+    if (type === 'cannon' || type === 'brazier') dmg *= am.heavyMul;
     return {
-      dmg: Math.round(d.dmg * (1 + (lv - 1) * 0.55) * mb.dmgMul),
-      cd: d.cd * (1 - (lv - 1) * 0.08) * mb.cdMul,
-      range: d.range + (lv - 1) * 8,
-      slow: d.slow || 0,
-      chain: d.chain ? d.chain + (lv >= 3 ? 1 : 0) : 0,
-      poison: d.poison ? d.poison + (lv - 1) : 0,
+      dmg: Math.round(dmg),
+      cd: d.cd * (1 - (lv - 1) * 0.08) * mb.cdMul * am.cdMul,
+      range: (d.range + (lv - 1) * 8) * am.rangeMul,
+      slow: Math.min(0.75, (d.slow || 0) + am.slowBonus),
+      chain: (d.chain ? d.chain + (lv >= 3 ? 1 : 0) : 0) + ((d.chain && am.chainBonus) ? am.chainBonus : 0),
+      poison: (d.poison ? d.poison + (lv - 1) : 0) + am.poisonBonus,
       splash: d.splash ? d.splash + (lv - 1) * 4 : 0,
     };
   }
@@ -1929,6 +2186,12 @@
     state.shakes = 0; state.bedFlash = 0; state.doorFlash = 0; state.flash = 0;
     state.logs = [];
     state.run = { nightsCleared: 0, kills: 0, bossKills: 0, banked: false };
+    state.augments = [];
+    state.augPickOpen = false;
+    state.lastStandUsed = false;
+    state.doorInvuln = 0;
+    state.bedGunT = 0;
+    state.bellT = 0;
     resetCells();
 
     // free towers from meta / character
@@ -1957,6 +2220,7 @@
     log(`第1夜 · ${chn} · 房间「${room.name}」${room.cols}×${room.rows}`, 'bad');
     log(`AI 队友：${teammates.map(t => t.name + '/' + t.roomName).join('、')}`, 'soulc');
     if (!save.tutSeen) showTutorial();
+    else showAugmentPick();
     startBgm();
   }
 
@@ -1983,6 +2247,7 @@
         state.paused = false;
         if (ui.btnPause) ui.btnPause.textContent = '暂停';
       }
+      if (!(state.augments && state.augments.length) && !state.augPickOpen) showAugmentPick();
     };
   }
 
@@ -1998,7 +2263,7 @@
       hp, maxHp: hp,
       baseDmg: (7 + (wave - 1) * 1.8) * dd.dmgMul * firstMul * kd.dmgMul,
       dmg: 0,
-      speed: (48 + (wave - 1) * 2) * dd.speedMul * firstMul * kd.speedMul,
+      speed: (48 + (wave - 1) * 2) * dd.speedMul * firstMul * kd.speedMul * augMods().enemySpeedMul,
       attackCd: 0,
       slowT: 0, slowMul: 1,
       poisonT: 0, poisonDps: 0,
@@ -2082,6 +2347,24 @@
       state.gold += gold;
       burst(e.x, e.y, e.color, e.kind === 'boss' ? 18 : 8, { speed: e.kind === 'boss' ? 40 : 22 });
       addFloater(e.x, e.y - 12, `+${gold}`, '#f0c14b');
+      const am = augMods();
+      // 亡语爆破
+      if (am.onKillBoom > 0) {
+        burst(e.x, e.y, '#ff8a4a', 12, { speed: 40, life: 0.35 });
+        lightHalo(e.x, e.y, 20, '#ff8a4a', 0.7);
+        state.beams.push({ x1: e.x, y1: e.y, x2: e.x + 20, y2: e.y, color: '#ff8a4a', life: 0.15, max: 0.15, kind: 'ring' });
+        for (const o of livingEnemies()) {
+          if (o === e || o.dead) continue;
+          if (Math.hypot(o.x - e.x, o.y - e.y) <= 26) {
+            damageEnemy(o, am.onKillBoom, '#ff8a4a');
+          }
+        }
+      }
+      // 灵魂榨取
+      if (am.lifeDoor > 0) {
+        state.doorHp = Math.min(doorMax(state.doorLv), state.doorHp + am.lifeDoor);
+        addFloater(door.x - 2, door.y + 8 + Math.random() * 20, `+${am.lifeDoor}门`, '#7dffa0');
+      }
       if (e.kind === 'boss') {
         state.run.bossKills = (state.run.bossKills || 0) + 1;
         log('BOSS 击破！', 'good');
@@ -2134,7 +2417,7 @@
     if (reason === 'kill') state.run.kills += 1;
     if (state.run && state.run.bossKills > 0 && reason === 'kill') { /* counted in damageEnemy */ }
     const aliveAI = teammates.filter(t => !t.dead).length;
-    const bonus = 50 + state.wave * 20 + aliveAI * 15 + (reason === 'kill' ? (isBossNight() ? 150 : 80) : 0);
+    const bonus = Math.floor((50 + state.wave * 20 + aliveAI * 15 + (reason === 'kill' ? (isBossNight() ? 150 : 80) : 0)) * augMods().nightGoldMul);
     state.gold += bonus;
     for (const e of livingEnemies()) burst(e.x, e.y, e.color, 8, { speed: 24 });
     state.flash = 0.25;
@@ -2153,10 +2436,13 @@
     $('btn-next').onclick = () => {
       state.wave += 1; state.phase = 'playing'; state.paused = false;
       state.nightT = 0; state.bullets = []; state.particles = [];
+      state.lastStandUsed = false; // reset per night
       state.doorHp = Math.min(doorMax(state.doorLv), state.doorHp + doorMax(state.doorLv) * 0.4);
       startWave(); ui.overlay.classList.remove('show');
       log(`第${state.wave}夜开始${isBossNight()?' · BOSS夜':''}`, 'bad');
       startBgm();
+      // hextech pick between nights
+      setTimeout(() => showAugmentPick(), 200);
     };
     $('btn-home-win').onclick = () => {
       const souls = bankRun(state.run.nightsCleared, state.run.kills > 0);
@@ -2396,7 +2682,8 @@
     if (typeof state.feedFlash === 'number') state.feedFlash = Math.max(0, state.feedFlash - dt);
 
     // any modal/overlay freezes combat clock
-    const overlayOpen = ui.overlay && ui.overlay.classList.contains('show');
+    const augOpen = state.augPickOpen || (document.getElementById('modal-aug') && document.getElementById('modal-aug').classList.contains('show'));
+    const overlayOpen = (ui.overlay && ui.overlay.classList.contains('show')) || augOpen;
     if (state.phase !== 'playing' || state.paused || overlayOpen) {
       updateParticles(dt * 0.3);
       return;
@@ -2471,6 +2758,35 @@
     }
     state.doorHealPulse = Math.max(0, (state.doorHealPulse || 0) - dt * 2.2);
     state.doorHp = Math.min(doorMax(state.doorLv), state.doorHp + doorRegen(state.doorLv) * dt * 0.35);
+    if (state.doorInvuln > 0) state.doorInvuln -= dt;
+
+    // legendary global rules
+    const am = augMods();
+    state.bedGunT = (state.bedGunT || 0) + dt;
+    if (am.bedGun && state.bedGunT >= 2.5) {
+      state.bedGunT = 0;
+      const bp = bedPixel();
+      const tx = doorParkX - 20;
+      const ty = corridorY;
+      state.beams.push({ x1: bp.x + bp.w / 2, y1: bp.y + bp.h / 2, x2: tx, y2: ty, color: '#f0c14b', life: 0.2, max: 0.2, kind: 'beam' });
+      burst(tx, ty, '#f0c14b', 10, { speed: 30, life: 0.3 });
+      lightHalo(tx, ty, 18, '#f0c14b', 0.7);
+      const bedDmg = 10 + state.bedLv * 4;
+      for (const e of livingEnemies()) {
+        if (Math.hypot(e.x - tx, e.y - ty) <= 34) damageEnemy(e, bedDmg, '#f0c14b');
+      }
+    }
+    state.bellT = (state.bellT || 0) + dt;
+    if (am.bell > 0 && state.bellT >= 4) {
+      state.bellT = 0;
+      state.flash = Math.max(state.flash, 0.15);
+      for (const e of livingEnemies()) {
+        damageEnemy(e, am.bell, '#c4a0ff');
+        state.beams.push({ x1: e.x, y1: e.y - 20, x2: e.x, y2: e.y, color: '#c4a0ff', life: 0.12, max: 0.12, kind: 'beam' });
+        burst(e.x, e.y - 6, '#c4a0ff', 4, { speed: 16, life: 0.2 });
+      }
+      if (livingEnemies().length) log('午夜丧钟！', 'soulc');
+    }
 
     // AI teammates auto-defend
     for (const tm of teammates) {
@@ -2548,10 +2864,31 @@
               log(`${targetAI.name} 的门破了！猛鬼吞噬变强`, 'bad');
             }
           } else {
-            state.doorHp -= e.dmg;
-            state.doorFlash = 0.25;
-            state.shakes = e.kind === 'boss' ? 1.2 : e.kind === 'elite' ? 0.9 : 0.55;
-            addFloater(door.x - 6, door.y + 10 + Math.random()*30, `-${Math.round(e.dmg)}`, '#ff4d5e', e.kind === 'boss');
+            const am = augMods();
+            // 绝境屏障
+            if (am.lastStand && !state.lastStandUsed && state.doorHp - e.dmg <= 0) {
+              state.doorHp = 1;
+              state.lastStandUsed = true;
+              state.doorInvuln = 3;
+              state.flash = 0.4;
+              log('绝境屏障！门锁血 3 秒无敌', 'good');
+              addFloater(door.x - 4, door.y + door.h / 2, '屏障!', '#ff8fb3', true);
+              lightHalo(door.x + door.w / 2, door.y + door.h / 2, 30, '#ff8fb3', 0.9);
+              beep(880, 0.15, 'square', 0.04);
+            } else if (!(state.doorInvuln > 0)) {
+              state.doorHp -= e.dmg;
+              // 门之反噬
+              if (am.thorns > 0) {
+                const back = e.dmg * am.thorns;
+                damageEnemy(e, back, '#ff8fb3');
+                addFloater(e.x, e.y - 14, `反伤-${Math.round(back)}`, '#ff8fb3');
+              }
+            }
+            if (!(state.doorInvuln > 0)) {
+              state.doorFlash = 0.25;
+              state.shakes = e.kind === 'boss' ? 1.2 : e.kind === 'elite' ? 0.9 : 0.55;
+              addFloater(door.x - 6, door.y + 10 + Math.random()*30, `-${Math.round(e.dmg)}`, '#ff4d5e', e.kind === 'boss');
+            }
             if (state.doorHp <= 0) { state.doorHp = 0; loseGame(); return; }
           }
         }
@@ -2645,7 +2982,20 @@
         b.life = 0;
         damageEnemy(tgt, b.dmg, b.color);
         if (b.slow) { tgt.slowT = Math.max(tgt.slowT, 1.2); tgt.slowMul = 0.55; }
-        if (b.poison) { tgt.poisonT = 3; tgt.poisonDps = b.poison; }
+        if (b.poison) { tgt.poisonT = 3; tgt.poisonDps = Math.max(tgt.poisonDps || 0, b.poison); }
+        // 穿甲弹幕：波及射程内其他敌人
+        if (augMods().pierce) {
+          for (const e2 of livingEnemies()) {
+            if (e2 === tgt) continue;
+            if (Math.hypot(e2.x - tgt.x, e2.y - tgt.y) <= 36) {
+              damageEnemy(e2, Math.floor(b.dmg * 0.55), b.color);
+              state.beams.push({
+                x1: tgt.x, y1: tgt.y, x2: e2.x, y2: e2.y,
+                color: '#ffffff', life: 0.1, max: 0.1, kind: 'line',
+              });
+            }
+          }
+        }
         // hit flash ring
         burst(tgt.x, tgt.y, b.color, b.kind === 'cannon' || b.kind === 'brazier' ? 10 : 5, {
           speed: b.kind === 'eye' ? 32 : 20, life: 0.28,
