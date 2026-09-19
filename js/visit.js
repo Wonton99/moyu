@@ -11,7 +11,7 @@
   var PREFIX = 'moyu-hub';
   var LOCAL_KEY = 'moyu_hub_visits_v2';
   var API = 'https://abacus.jasoncameron.dev';
-  var SCRIPT_VER = 'pv3';
+  var SCRIPT_VER = 'pv4';
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -97,11 +97,11 @@
     if (typeof today === 'number') {
       chip.textContent = '今日访问 ' + today;
       chip.dataset.source = 'global';
-      chip.title = '全站今日 PV（Abacus，按日重置）';
+      chip.removeAttribute('title');
     } else {
       chip.textContent = '本机今日 ' + local.today;
       chip.dataset.source = 'local';
-      chip.title = '全站今日计数暂不可用 · 当前为本机';
+      chip.removeAttribute('title');
     }
 
     if (typeof total === 'number') {
@@ -109,11 +109,11 @@
       if (uv != null) text += ' · 访客 ' + uv;
       foot.textContent = text;
       foot.dataset.source = 'global';
-      foot.title = '全站累计 PV（与今日同源 Abacus）' + (uv != null ? ' · UV 来自不蒜子' : '');
+      foot.removeAttribute('title');
     } else {
       foot.textContent = '本机累计 ' + local.total;
       foot.dataset.source = 'local';
-      foot.title = '本设备累计打开次数';
+      foot.removeAttribute('title');
     }
   }
 
