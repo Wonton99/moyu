@@ -19,7 +19,7 @@
     </a>
     <div class="top-stats">
       <span class="online">3 款游戏</span>
-      <span class="visit-chip" id="visitToday" data-source="local">今日访问 …</span>
+      <span class="visit-chip" id="visitToday" data-source="local">统计中…</span>
     </div>
   </header>
 
@@ -139,6 +139,11 @@
     <span class="sep">·</span>
     <span id="visitLocalTotal" class="visit-foot" data-source="local">累计访问 …</span>
   </footer>
-  <script src="js/visit.js" defer></script>
+  <!-- busuanzi 需要容器在 DOM 中存在（数值由脚本填入，再由 visit.js 读取） -->
+  <div class="busuanzi-anchor" aria-hidden="true">
+    <span id="busuanzi_container_site_pv">本站PV:<span id="busuanzi_value_site_pv"></span></span>
+    <span id="busuanzi_container_site_uv">本站UV:<span id="busuanzi_value_site_uv"></span></span>
+  </div>
+  <script src="js/visit.js?v=pv2" defer></script>
 </body>
 </html>

@@ -16,4 +16,4 @@
 
 - 建议使用最新版 Chrome / Edge / Firefox
 - 存档保存在浏览器本地，换设备会是新档
-- 首页「今日访问 / 累计访问」为全站 PV，经 [Abacus](https://abacus.jasoncameron.dev) 统计；接口不可用时回退为本机计数
+- 首页访问量：**全站今日 PV** 走 Abacus；**累计 PV/UV** 走不蒜子（Busuanzi）。接口失败时会明确标成「本机」，不会假装是全站数据。

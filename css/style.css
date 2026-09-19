@@ -101,14 +101,30 @@ a {
   white-space: nowrap;
 }
 
-.visit-chip[data-source="local"] {
+.visit-chip[data-source="local"],
+.visit-chip[data-source="mixed"] {
   color: var(--muted);
   background: #F3F4F6;
   border-color: var(--line);
 }
 
+.visit-chip[data-source="global"] {
+  color: var(--teal);
+  background: var(--teal-soft);
+  border-color: #99F6E4;
+}
+
 .visit-foot {
   font-variant-numeric: tabular-nums;
+}
+
+.busuanzi-anchor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 /* intro */
