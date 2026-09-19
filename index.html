@@ -17,7 +17,10 @@
       <span class="brand-mark" aria-hidden="true">摸</span>
       <span class="brand-name">摸鱼</span>
     </a>
-    <span class="online">3 款游戏</span>
+    <div class="top-stats">
+      <span class="online">3 款游戏</span>
+      <span class="visit-chip" id="visitToday">今日访问 …</span>
+    </div>
   </header>
 
   <main>
@@ -133,6 +136,16 @@
     <a href="games/dorm-night/">宿舍夜班</a>
     <span class="sep">·</span>
     <a href="games/sudoku/">数独增量</a>
+    <span class="sep">·</span>
+    <span id="visitLocalTotal" class="visit-foot">本机累计 —</span>
+    <img
+      class="visitor-badge"
+      src="https://visitor-badge.laobi.icu/badge?page_id=Wonton99.moyu&left_text=visitors&right_color=0F766E"
+      alt="累计访客"
+      height="20"
+      loading="lazy"
+    />
   </footer>
+  <script src="js/visit.js" defer></script>
 </body>
 </html>

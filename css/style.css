@@ -78,6 +78,41 @@ a {
   color: var(--muted);
 }
 
+.top-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.visit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal);
+  background: var(--teal-soft);
+  border: 1px solid #99F6E4;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.visit-foot {
+  font-variant-numeric: tabular-nums;
+}
+
+.visitor-badge {
+  display: inline-block;
+  vertical-align: middle;
+  height: 20px;
+  width: auto;
+  opacity: 0.92;
+}
+
 /* intro */
 .intro {
   max-width: var(--max);
